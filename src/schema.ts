@@ -1,7 +1,6 @@
 import { HeadingLevel, ShadingType } from 'docx';
 import { DocxSerializer, MarkSerializer, NodeSerializer } from './serializer';
-import { getLatexFromNode } from './utils';
-import { Mark } from 'prosemirror-model';
+import { getLatexFromNode, coverColorToHex } from './utils';
 
 export const defaultNodes: NodeSerializer = {
   text(state, node) {
@@ -71,7 +70,7 @@ export const defaultNodes: NodeSerializer = {
     state.closeLink();
   },
   default(state, node) {
-    if (node.isAtom || node.isLeaf) return
+    if (node.isAtom || node.isLeaf) return;
 
     if (node.isInline) {
       state.renderInline(node);
@@ -90,7 +89,7 @@ export const defaultMarks: MarkSerializer = {
   },
   color(state, node, mark) {
     return {
-      color: mark.attrs.color || '#000000',
+      color: mark.attrs.color ? coverColorToHex(mark.attrs.color) : '#000000',
     };
   },
   font_family(state, node, mark) {
@@ -109,7 +108,7 @@ export const defaultMarks: MarkSerializer = {
   },
   highlight(state, node, mark) {
     return {
-      highlight: mark.attrs.color || 'transparent',
+      highlight: mark.attrs.color ? coverColorToHex(mark.attrs.color) : 'transparent',
     };
   },
   abbr() {

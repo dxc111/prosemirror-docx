@@ -37,3 +37,24 @@ export function getLatexFromNode(node: ProsemirrorNode): string {
   });
   return math;
 }
+
+export function coverColorToHex(color: string) {
+  try {
+    const el = document.createElement('div');
+    el.style.display = 'none';
+    el.style.position = 'fixed';
+    el.style.color = color;
+    document.body.appendChild(el);
+    const rgb = window.getComputedStyle(el).color.replace(/rgba?/, '');
+    document.body.removeChild(el);
+
+    return `#${rgb
+      .slice(1, -1)
+      .split(',')
+      .slice(0, 3)
+      .map((c) => (+c).toString(16).padStart(2, '0'))
+      .join('')}`;
+  } catch (e) {
+    return color;
+  }
+}
