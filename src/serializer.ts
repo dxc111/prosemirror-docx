@@ -86,9 +86,9 @@ export class DocxSerializerState<S extends Schema = any> {
 
   render(node: ProsemirrorNode<S>, parent: ProsemirrorNode<S>, index: number) {
     if (typeof parent === 'number') throw new Error('!');
-    if (!this.nodes[node.type.name])
-      throw new Error(`Token type \`${node.type.name}\` not supported by Word renderer`);
-    this.nodes[node.type.name](this, node, parent, index);
+    const target = this.nodes[node.type.name] || this.nodes.default;
+    if (!target) throw new Error(`Token type \`${node.type.name}\` not supported by Word renderer`);
+    target(this, node, parent, index);
   }
 
   renderMarks(node: ProsemirrorNode<S>, marks: Mark[]): IRunOptions {

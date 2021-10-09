@@ -1,6 +1,7 @@
 import { HeadingLevel, ShadingType } from 'docx';
 import { DocxSerializer, MarkSerializer, NodeSerializer } from './serializer';
 import { getLatexFromNode } from './utils';
+import { Mark } from 'prosemirror-model';
 
 export const defaultNodes: NodeSerializer = {
   text(state, node) {
@@ -57,8 +58,8 @@ export const defaultNodes: NodeSerializer = {
   math(state, node) {
     state.math(getLatexFromNode(node), { inline: true });
   },
-  equation(state, node) {
-    const { id, numbered } = node.attrs;
+  blocked_latex(state, node) {
+    const { id = Date.now(), numbered } = node.attrs;
     state.math(getLatexFromNode(node), { inline: false, numbered, id });
     state.closeBlock(node);
   },
@@ -69,26 +70,46 @@ export const defaultNodes: NodeSerializer = {
     state.renderInline(node);
     state.closeLink();
   },
+  default(state, node) {
+    if (node.isAtom || node.isLeaf) return
+
+    if (node.isInline) {
+      state.renderInline(node);
+    } else {
+      state.renderContent(node);
+    }
+  },
 };
 
 export const defaultMarks: MarkSerializer = {
-  italics() {
+  italic() {
     return { italics: true };
   },
   bold() {
     return { bold: true };
   },
-  code() {
+  color(state, node, mark) {
+    return {
+      color: mark.attrs.color || '#000000',
+    };
+  },
+  font_family(state, node, mark) {
     return {
       font: {
-        name: 'Monospace',
+        name: mark.attrs.font_family || 'Kaiti SC',
       },
-      color: '000000',
-      shading: {
-        type: ShadingType.SOLID,
-        color: 'D2D3D2',
-        fill: 'D2D3D2',
+    };
+  },
+  font_size(state, node, mark) {
+    return {
+      font: {
+        name: mark.attrs.font_family || 'Kaiti SC',
       },
+    };
+  },
+  highlight(state, node, mark) {
+    return {
+      highlight: mark.attrs.color || 'transparent',
     };
   },
   abbr() {
