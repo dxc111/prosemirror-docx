@@ -62,19 +62,21 @@ export const defaultNodes: NodeSerializer = {
     state.math(getLatexFromNode(node), { inline: false, numbered, id });
     state.closeBlock(node);
   },
+  link(state, node) {
+    // Note, this is handled specifically in the serializer
+    // Word treats links more like a Node rather than a mark
+    state.openLink(node.attrs.href);
+    state.renderInline(node);
+    state.closeLink();
+  },
 };
 
 export const defaultMarks: MarkSerializer = {
-  em() {
+  italics() {
     return { italics: true };
   },
-  strong() {
+  bold() {
     return { bold: true };
-  },
-  link() {
-    // Note, this is handled specifically in the serializer
-    // Word treats links more like a Node rather than a mark
-    return {};
   },
   code() {
     return {
@@ -99,7 +101,7 @@ export const defaultMarks: MarkSerializer = {
   superscript() {
     return { subScript: true };
   },
-  strikethrough() {
+  strike() {
     // doubleStrike!
     return { strike: true };
   },

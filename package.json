@@ -1,8 +1,8 @@
 {
-  "name": "prosemirror-docx",
-  "version": "0.0.3",
-  "description": "Export from a prosemirror document to Microsoft word",
-  "author": "Rowan Cockett <rowan@curvenote.com>",
+  "name": "prosemirror-docx-web",
+  "version": "0.0.6",
+  "description": "Export from a prosemirror document to Microsoft word forked from curvenote/prosemirror-docx",
+  "author": "dxc111 <dx131477@outlook.com>",
   "license": "MIT",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -37,7 +37,6 @@
     "lint:format:fix": "prettier --write \"src/**/*.ts\""
   },
   "dependencies": {
-    "buffer-image-size": "^0.6.4",
     "docx": "^7.0.0",
     "prosemirror-model": "^1.14.3"
   },

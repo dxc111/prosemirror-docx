@@ -15,30 +15,31 @@ import {
   ImageRun,
   AlignmentType,
 } from 'docx';
-import sizeOf from 'buffer-image-size';
 import { INumbering, createNumbering, NumberingStyles } from './numbering';
 import { createDocFromState, createShortId } from './utils';
 
 // This is duplicated from @curvenote/schema
 export type AlignOptions = 'left' | 'center' | 'right';
 
-export type NodeSerializer<S extends Schema = any> = Record<
-  string,
+export type NodeSerializer<S extends Schema = any> = Record<string,
   (
     state: DocxSerializerState<S>,
     node: ProsemirrorNode<S>,
     parent: ProsemirrorNode<S>,
     index: number,
-  ) => void
->;
+  ) => void>;
 
-export type MarkSerializer<S extends Schema = any> = Record<
-  string,
-  (state: DocxSerializerState<S>, node: ProsemirrorNode<S>, mark: Mark<S>) => IRunOptions
->;
+export type MarkSerializer<S extends Schema = any> = Record<string,
+  (state: DocxSerializerState<S>, node: ProsemirrorNode<S>, mark: Mark<S>) => IRunOptions>;
+
+interface ImageBuffer {
+  arrayBuffer: string | ArrayBuffer;
+  width: number;
+  height: number;
+}
 
 export type Options = {
-  getImageBuffer: (src: string) => Buffer;
+  getImageBuffer: (src: string) => ImageBuffer;
 };
 
 export type IMathOpts = {
@@ -46,6 +47,8 @@ export type IMathOpts = {
   id?: string | null;
   numbered?: boolean;
 };
+
+let currentLink: { link: string; stack: ParagraphChild[] } | undefined;
 
 export class DocxSerializerState<S extends Schema = any> {
   nodes: NodeSerializer<S>;
@@ -96,48 +99,87 @@ export class DocxSerializerState<S extends Schema = any> {
       .reduce((a, b) => ({ ...a, ...b }), {});
   }
 
+  openLink(href: string) {
+    this.addRunOptions({ style: 'Hyperlink' });
+    // TODO: https://github.com/dolanmiu/docx/issues/1119
+    // Remove the if statement here and oneLink!
+    // const oneLink = true;
+    // if (!oneLink) {
+    //   closeLink();
+    // } else {
+    //   if (currentLink && sameLink) return;
+    //   if (currentLink && !sameLink) {
+    //     // Close previous, and open a new one
+    //     closeLink();
+    //   }
+    // }
+    currentLink = {
+      link: href,
+      stack: this.current,
+    };
+    this.current = [];
+  }
+
+  closeLink() {
+    if (!currentLink) return;
+    const hyperlink = new ExternalHyperlink({
+      link: currentLink.link,
+      // child: this.current[0],
+      children: this.current,
+    });
+    this.current = [...currentLink.stack, hyperlink];
+    currentLink = undefined;
+  }
+
   renderInline(parent: ProsemirrorNode<S>) {
     // Pop the stack over to this object when we encounter a link, and closeLink restores it
-    let currentLink: { link: string; stack: ParagraphChild[] } | undefined;
-    const closeLink = () => {
-      if (!currentLink) return;
-      const hyperlink = new ExternalHyperlink({
-        link: currentLink.link,
-        // child: this.current[0],
-        children: this.current,
-      });
-      this.current = [...currentLink.stack, hyperlink];
-      currentLink = undefined;
-    };
-    const openLink = (href: string) => {
-      const sameLink = href === currentLink?.link;
-      this.addRunOptions({ style: 'Hyperlink' });
-      // TODO: https://github.com/dolanmiu/docx/issues/1119
-      // Remove the if statement here and oneLink!
-      const oneLink = true;
-      if (!oneLink) {
-        closeLink();
-      } else {
-        if (currentLink && sameLink) return;
-        if (currentLink && !sameLink) {
-          // Close previous, and open a new one
-          closeLink();
-        }
-      }
-      currentLink = {
-        link: href,
-        stack: this.current,
-      };
-      this.current = [];
-    };
+    // let currentLink: { link: string; stack: ParagraphChild[] } | undefined;
+    // const closeLink = () => {
+    //   if (!currentLink) return;
+    //   const hyperlink = new ExternalHyperlink({
+    //     link: currentLink.link,
+    //     // child: this.current[0],
+    //     children: this.current,
+    //   });
+    //   this.current = [...currentLink.stack, hyperlink];
+    //   currentLink = undefined;
+    // };
+    // const openLink = (href: string) => {
+    //   const sameLink = href === currentLink?.link;
+    //   this.addRunOptions({ style: 'Hyperlink' });
+    //   // TODO: https://github.com/dolanmiu/docx/issues/1119
+    //   // Remove the if statement here and oneLink!
+    //   const oneLink = true;
+    //   if (!oneLink) {
+    //     closeLink();
+    //   } else {
+    //     if (currentLink && sameLink) return;
+    //     if (currentLink && !sameLink) {
+    //       // Close previous, and open a new one
+    //       closeLink();
+    //     }
+    //   }
+    //   currentLink = {
+    //     link: href,
+    //     stack: this.current,
+    //   };
+    //   this.current = [];
+    // };
     const progress = (node: ProsemirrorNode<S>, offset: number, index: number) => {
-      const links = node.marks.filter((m) => m.type.name === 'link');
-      const hasLink = links.length > 0;
-      if (hasLink) {
-        openLink(links[0].attrs.href);
-      } else if (!hasLink && currentLink) {
-        closeLink();
-      }
+      // const links: ProsemirrorNode[] = [];
+      // node.forEach((child) => {
+      //   if (child.type.name === 'link') {
+      //     links.push(child);
+      //     return false;
+      //   }
+      //   return true;
+      // });
+      // const hasLink = links.length > 0;
+      // if (hasLink) {
+      //   openLink(links[0].attrs.href);
+      // } else if (!hasLink && currentLink) {
+      //   closeLink();
+      // }
       if (node.isText) {
         this.text(node.text, this.renderMarks(node, node.marks));
       } else {
@@ -146,7 +188,7 @@ export class DocxSerializerState<S extends Schema = any> {
     };
     parent.forEach(progress);
     // Must call close at the end of everything, just in case
-    closeLink();
+    // closeLink();
   }
 
   renderList(node: ProsemirrorNode<S>, style: NumberingStyles) {
@@ -220,18 +262,15 @@ export class DocxSerializerState<S extends Schema = any> {
     });
   }
 
-  image(src: string, widthPercent = 70, align: AlignOptions = 'center') {
-    const buffer = this.options.getImageBuffer(src);
-    const dimensions = sizeOf(buffer);
-    const aspect = dimensions.height / dimensions.width;
-    const maxWidth = 600; // not sure what this actually is, seems to be close for 8.5x11
-    const width = maxWidth * (widthPercent / 100);
+  image(src: string, align: AlignOptions = 'center') {
+    const { arrayBuffer, width, height } = this.options.getImageBuffer(src);
+
     this.current.push(
       new ImageRun({
-        data: buffer,
+        data: arrayBuffer,
         transformation: {
           width,
-          height: width * aspect,
+          height,
         },
       }),
     );

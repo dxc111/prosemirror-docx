@@ -25,8 +25,8 @@ export function createDocFromState(state: {
   return doc;
 }
 
-export function writeDocx(doc: Document, write: (buffer: Buffer) => void) {
-  Packer.toBuffer(doc).then(write);
+export function writeDocx(doc: Document, write: (buffer: Blob) => void) {
+  Packer.toBlob(doc).then(write);
 }
 
 export function getLatexFromNode(node: ProsemirrorNode): string {
