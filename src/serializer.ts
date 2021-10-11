@@ -14,6 +14,9 @@ import {
   Bookmark,
   ImageRun,
   AlignmentType,
+  Table,
+  TableRow,
+  TableCell,
 } from 'docx';
 import { INumbering, createNumbering, NumberingStyles } from './numbering';
 import { createDocFromState, createShortId } from './utils';
@@ -49,6 +52,7 @@ export type IMathOpts = {
 };
 
 let currentLink: { link: string; stack: ParagraphChild[] } | undefined;
+let currentTable: { rows: TableRow[]; stack: ParagraphChild[] } | undefined;
 
 export class DocxSerializerState<S extends Schema = any> {
   nodes: NodeSerializer<S>;
@@ -130,6 +134,10 @@ export class DocxSerializerState<S extends Schema = any> {
     this.current = [...currentLink.stack, hyperlink];
     currentLink = undefined;
   }
+
+  openTable() {}
+
+  closeTable() {}
 
   renderInline(parent: ProsemirrorNode<S>) {
     // Pop the stack over to this object when we encounter a link, and closeLink restores it
@@ -226,7 +234,14 @@ export class DocxSerializerState<S extends Schema = any> {
 
   text(text: string | null | undefined, opts?: IRunOptions) {
     if (!text) return;
-    this.current.push(new TextRun({ text, ...this.nextRunOpts, ...opts }));
+    this.current.push(
+      new TextRun({
+        text,
+        color: currentLink ? '#007aff' : '#232424',
+        ...this.nextRunOpts,
+        ...opts,
+      }),
+    );
     delete this.nextRunOpts;
   }
 

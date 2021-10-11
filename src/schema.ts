@@ -69,6 +69,12 @@ export const defaultNodes: NodeSerializer = {
     state.renderInline(node);
     state.closeLink();
   },
+  table_cell(state, node) {
+
+  },
+  table_header(state, node) {},
+  table_row(state, node) {},
+  table(state, node) {},
   default(state, node) {
     if (node.isAtom || node.isLeaf) return;
 
@@ -107,18 +113,19 @@ export const defaultMarks: MarkSerializer = {
     };
   },
   highlight(state, node, mark) {
+    console.log('highlight', mark.attrs.color);
     return {
-      highlight: mark.attrs.color ? coverColorToHex(mark.attrs.color) : 'transparent',
+      highlight: mark.attrs.color ? coverColorToHex(mark.attrs.color) : undefined,
     };
   },
   abbr() {
     // TODO: abbreviation
     return {};
   },
-  subscript() {
+  sub() {
     return { subScript: true };
   },
-  superscript() {
+  sup() {
     return { subScript: true };
   },
   strike() {
