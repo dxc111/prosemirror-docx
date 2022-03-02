@@ -54,12 +54,13 @@ export const defaultNodes: NodeSerializer = {
     state.closeBlock(node);
   },
   // Technical
-  math(state, node) {
-    state.math(getLatexFromNode(node), { inline: true });
+  latex(state, node) {
+    // state.math(getLatexFromNode(node), { inline: true });
+    state.math(node.attrs.input, { inline: true });
   },
   blocked_latex(state, node) {
     const { id = Date.now(), numbered } = node.attrs;
-    state.math(getLatexFromNode(node), { inline: false, numbered, id });
+    state.math(node.attrs.input, { inline: false, numbered, id });
     state.closeBlock(node);
   },
   link(state, node) {
