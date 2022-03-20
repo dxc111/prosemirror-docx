@@ -1,4 +1,5 @@
 import {
+  AlignmentType,
   Document,
   Footer,
   INumberingOptions,
@@ -33,7 +34,7 @@ export function createDocFromState(
         footers: footerText
           ? {
               default: new Footer({
-                children: [new Paragraph(footerText)],
+                children: [new Paragraph({ text: footerText, alignment: AlignmentType.CENTER })],
               }),
             }
           : undefined,

@@ -343,7 +343,7 @@ export class DocxSerializer<S extends Schema = any> {
   serialize(content: ProsemirrorNode<S>, options: Options, footerText = 'Powered by Lattics') {
     const state = new DocxSerializerState<S>(this.nodes, this.marks, options);
     state.renderContent(content);
-    const doc = createDocFromState(state, footerText);
-    return doc;
+
+    return createDocFromState(state, footerText);
   }
 }
