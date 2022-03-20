@@ -1,6 +1,6 @@
 {
   "name": "prosemirror-docx-web",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "description": "Export from a prosemirror document to Microsoft word forked from curvenote/prosemirror-docx",
   "author": "dxc111 <dx131477@outlook.com>",
   "license": "MIT",
@@ -18,12 +18,12 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/curvenote/prosemirror-docx.git"
+    "url": "git+https://github.com/dxc111/prosemirror-docx.git"
   },
   "bugs": {
-    "url": "https://github.com/curvenote/prosemirror-docx/issues"
+    "url": "https://github.com/dxc111/prosemirror-docx/issues"
   },
-  "homepage": "https://github.com/curvenote/prosemirror-docx",
+  "homepage": "https://github.com/dxc111/prosemirror-docx",
   "scripts": {
     "clean": "rm -rf dist",
     "build": "yarn run clean && tsc -p .;rm -rf dist/test; mv dist/src/* dist; rmdir dist/src;",
