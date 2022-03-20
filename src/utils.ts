@@ -1,15 +1,26 @@
-import { Document, INumberingOptions, ISectionOptions, Packer, SectionType } from 'docx';
+import {
+  Document,
+  Footer,
+  INumberingOptions,
+  ISectionOptions,
+  Packer,
+  Paragraph,
+  SectionType,
+} from 'docx';
 import { Node as ProsemirrorNode } from 'prosemirror-model';
 
 export function createShortId() {
   return Math.random().toString(36).substr(2, 9);
 }
 
-export function createDocFromState(state: {
-  numbering: INumberingOptions['config'];
-  children: ISectionOptions['children'];
-}) {
-  const doc = new Document({
+export function createDocFromState(
+  state: {
+    numbering: INumberingOptions['config'];
+    children: ISectionOptions['children'];
+  },
+  footerText?: string,
+) {
+  return new Document({
     numbering: {
       config: state.numbering,
     },
@@ -19,10 +30,16 @@ export function createDocFromState(state: {
           type: SectionType.CONTINUOUS,
         },
         children: state.children,
+        footers: footerText
+          ? {
+              default: new Footer({
+                children: [new Paragraph(footerText)],
+              }),
+            }
+          : undefined,
       },
     ],
   });
-  return doc;
 }
 
 export function writeDocx(doc: Document, write: (buffer: Blob) => void) {

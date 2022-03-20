@@ -24,16 +24,20 @@ import { createDocFromState, createShortId } from './utils';
 // This is duplicated from @curvenote/schema
 export type AlignOptions = 'left' | 'center' | 'right';
 
-export type NodeSerializer<S extends Schema = any> = Record<string,
+export type NodeSerializer<S extends Schema = any> = Record<
+  string,
   (
     state: DocxSerializerState<S>,
     node: ProsemirrorNode<S>,
     parent: ProsemirrorNode<S>,
     index: number,
-  ) => void>;
+  ) => void
+>;
 
-export type MarkSerializer<S extends Schema = any> = Record<string,
-  (state: DocxSerializerState<S>, node: ProsemirrorNode<S>, mark: Mark<S>) => IRunOptions>;
+export type MarkSerializer<S extends Schema = any> = Record<
+  string,
+  (state: DocxSerializerState<S>, node: ProsemirrorNode<S>, mark: Mark<S>) => IRunOptions
+>;
 
 interface ImageBuffer {
   arrayBuffer: string | ArrayBuffer;
@@ -336,10 +340,10 @@ export class DocxSerializer<S extends Schema = any> {
     this.marks = marks;
   }
 
-  serialize(content: ProsemirrorNode<S>, options: Options) {
+  serialize(content: ProsemirrorNode<S>, options: Options, footerText = 'Powered by Lattics') {
     const state = new DocxSerializerState<S>(this.nodes, this.marks, options);
     state.renderContent(content);
-    const doc = createDocFromState(state);
+    const doc = createDocFromState(state, footerText);
     return doc;
   }
 }
