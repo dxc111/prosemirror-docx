@@ -14,9 +14,8 @@ import {
   Bookmark,
   ImageRun,
   AlignmentType,
-  Table,
   TableRow,
-  TableCell, FootnoteReference,
+  FootnoteReferenceRun,
 } from 'docx';
 import { INumbering, createNumbering, NumberingStyles } from './numbering';
 import { createDocFromState, createShortId } from './utils';
@@ -290,7 +289,7 @@ export class DocxSerializerState<S extends Schema = any> {
   footnoteRef(id: string) {
     this.footnoteIds.push(id);
     this.footnoteIdx += 1;
-    this.current.push(new FootnoteReference(this.footnoteIdx));
+    this.current.push(new FootnoteReferenceRun(this.footnoteIdx));
   }
 
   image(src: string, align: AlignOptions = 'center') {
