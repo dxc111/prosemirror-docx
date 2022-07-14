@@ -23,20 +23,16 @@ import { createDocFromState, createShortId } from './utils';
 // This is duplicated from @curvenote/schema
 export type AlignOptions = 'left' | 'center' | 'right';
 
-export type NodeSerializer<S extends Schema = any> = Record<
-  string,
+export type NodeSerializer<S extends Schema = any> = Record<string,
   (
     state: DocxSerializerState<S>,
     node: ProsemirrorNode<S>,
     parent: ProsemirrorNode<S>,
     index: number,
-  ) => void
->;
+  ) => void>;
 
-export type MarkSerializer<S extends Schema = any> = Record<
-  string,
-  (state: DocxSerializerState<S>, node: ProsemirrorNode<S>, mark: Mark<S>) => IRunOptions
->;
+export type MarkSerializer<S extends Schema = any> = Record<string,
+  (state: DocxSerializerState<S>, node: ProsemirrorNode<S>, mark: Mark<S>) => IRunOptions>;
 
 interface ImageBuffer {
   arrayBuffer: string | ArrayBuffer;
@@ -87,7 +83,6 @@ export class DocxSerializerState<S extends Schema = any> {
     nodes: NodeSerializer<S>,
     marks: MarkSerializer<S>,
     options: Options,
-    private footnotes: string[],
   ) {
     this.nodes = nodes;
     this.marks = marks;
@@ -100,7 +95,6 @@ export class DocxSerializerState<S extends Schema = any> {
 
   renderContent(parent: ProsemirrorNode<S>) {
     parent.forEach((node, _, i) => this.render(node, parent, i));
-    this.footnote();
   }
 
   render(node: ProsemirrorNode<S>, parent: ProsemirrorNode<S>, index: number) {
@@ -150,9 +144,11 @@ export class DocxSerializerState<S extends Schema = any> {
     currentLink = undefined;
   }
 
-  openTable() {}
+  openTable() {
+  }
 
-  closeTable() {}
+  closeTable() {
+  }
 
   renderInline(parent: ProsemirrorNode<S>) {
     // Pop the stack over to this object when we encounter a link, and closeLink restores it
@@ -298,14 +294,6 @@ export class DocxSerializerState<S extends Schema = any> {
     this.current.push(new FootnoteReferenceRun(this.footnoteIdx));
   }
 
-  footnote() {
-    const F = new FootNotes();
-    this.footnotes.forEach((footnote, i) => {
-      F.createFootNote(i + 1, [new Paragraph({ children: [new TextRun(footnote)] })]);
-    });
-    this.current.push(F);
-  }
-
   image(src: string, align: AlignOptions = 'center') {
     const { arrayBuffer, width, height } = this.options.getImageBuffer(src);
 
@@ -371,9 +359,13 @@ export class DocxSerializer<S extends Schema = any> {
     footerText = '',
     footnotes: string[] = [],
   ) {
-    const state = new DocxSerializerState<S>(this.nodes, this.marks, options, footnotes);
+    const state = new DocxSerializerState<S>(this.nodes, this.marks, options);
     state.renderContent(content);
+    const f: Record<number, any> = footnotes.reduce((acc: Record<number, any>, cur, idx) => {
+      acc[idx + 1] = { children: [new Paragraph({ children: [new TextRun(cur)] }] }
+      return acc;
+    }, {});
 
-    return createDocFromState(state, footerText);
+    return createDocFromState(state, footerText, f);
   }
 }

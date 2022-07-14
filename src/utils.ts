@@ -20,8 +20,10 @@ export function createDocFromState(
     children: ISectionOptions['children'];
   },
   footerText?: string,
+  footnotes: Record<number, any> = {},
 ) {
   return new Document({
+    footnotes,
     numbering: {
       config: state.numbering,
     },
