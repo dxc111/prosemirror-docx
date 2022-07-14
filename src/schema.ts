@@ -38,6 +38,9 @@ export const defaultNodes: NodeSerializer = {
   hard_break(state) {
     state.addRunOptions({ break: 1 });
   },
+  footnote(state, node) {
+    state.footnoteRef(node.attrs.id);
+  },
   ordered_list(state, node) {
     state.renderList(node, 'numbered');
   },

@@ -16,7 +16,7 @@ import {
   AlignmentType,
   Table,
   TableRow,
-  TableCell,
+  TableCell, FootnoteReference,
 } from 'docx';
 import { INumbering, createNumbering, NumberingStyles } from './numbering';
 import { createDocFromState, createShortId } from './utils';
@@ -80,12 +80,18 @@ export class DocxSerializerState<S extends Schema = any> {
 
   currentNumbering?: { reference: string; level: number };
 
+  private footnoteIdx: number;
+
+  private footnoteIds: string[];
+
   constructor(nodes: NodeSerializer<S>, marks: MarkSerializer<S>, options: Options) {
     this.nodes = nodes;
     this.marks = marks;
     this.options = options ?? {};
     this.children = [];
     this.numbering = [];
+    this.footnoteIdx = 0;
+    this.footnoteIds = [];
   }
 
   renderContent(parent: ProsemirrorNode<S>) {
@@ -279,6 +285,12 @@ export class DocxSerializerState<S extends Schema = any> {
         },
       ],
     });
+  }
+
+  footnoteRef(id: string) {
+    this.footnoteIds.push(id);
+    this.footnoteIdx += 1;
+    this.current.push(new FootnoteReference(this.footnoteIdx));
   }
 
   image(src: string, align: AlignOptions = 'center') {
