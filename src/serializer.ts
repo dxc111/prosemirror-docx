@@ -15,7 +15,7 @@ import {
   ImageRun,
   AlignmentType,
   TableRow,
-  FootnoteReferenceRun,
+  FootnoteReferenceRun, FootNotes,
 } from 'docx';
 import { INumbering, createNumbering, NumberingStyles } from './numbering';
 import { createDocFromState, createShortId } from './utils';
@@ -83,7 +83,12 @@ export class DocxSerializerState<S extends Schema = any> {
 
   private footnoteIds: string[];
 
-  constructor(nodes: NodeSerializer<S>, marks: MarkSerializer<S>, options: Options) {
+  constructor(
+    nodes: NodeSerializer<S>,
+    marks: MarkSerializer<S>,
+    options: Options,
+    private footnotes: string[],
+  ) {
     this.nodes = nodes;
     this.marks = marks;
     this.options = options ?? {};
@@ -95,6 +100,7 @@ export class DocxSerializerState<S extends Schema = any> {
 
   renderContent(parent: ProsemirrorNode<S>) {
     parent.forEach((node, _, i) => this.render(node, parent, i));
+    this.footnote();
   }
 
   render(node: ProsemirrorNode<S>, parent: ProsemirrorNode<S>, index: number) {
@@ -292,6 +298,14 @@ export class DocxSerializerState<S extends Schema = any> {
     this.current.push(new FootnoteReferenceRun(this.footnoteIdx));
   }
 
+  footnote() {
+    const F = new FootNotes();
+    this.footnotes.forEach((footnote, i) => {
+      F.createFootNote(i + 1, [new Paragraph({ children: [new TextRun(footnote)] })]);
+    });
+    this.current.push(F);
+  }
+
   image(src: string, align: AlignOptions = 'center') {
     const { arrayBuffer, width, height } = this.options.getImageBuffer(src);
 
@@ -351,8 +365,13 @@ export class DocxSerializer<S extends Schema = any> {
     this.marks = marks;
   }
 
-  serialize(content: ProsemirrorNode<S>, options: Options, footerText = 'Powered by Lattics') {
-    const state = new DocxSerializerState<S>(this.nodes, this.marks, options);
+  serialize(
+    content: ProsemirrorNode<S>,
+    options: Options,
+    footerText = '',
+    footnotes: string[] = [],
+  ) {
+    const state = new DocxSerializerState<S>(this.nodes, this.marks, options, footnotes);
     state.renderContent(content);
 
     return createDocFromState(state, footerText);
