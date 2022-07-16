@@ -15,7 +15,7 @@ import {
   ImageRun,
   AlignmentType,
   TableRow,
-  FootnoteReferenceRun, FootNotes,
+  FootnoteReferenceRun,
 } from 'docx';
 import { INumbering, createNumbering, NumberingStyles } from './numbering';
 import { createDocFromState, createShortId } from './utils';
@@ -23,16 +23,20 @@ import { createDocFromState, createShortId } from './utils';
 // This is duplicated from @curvenote/schema
 export type AlignOptions = 'left' | 'center' | 'right';
 
-export type NodeSerializer<S extends Schema = any> = Record<string,
+export type NodeSerializer<S extends Schema = any> = Record<
+  string,
   (
     state: DocxSerializerState<S>,
     node: ProsemirrorNode<S>,
     parent: ProsemirrorNode<S>,
     index: number,
-  ) => void>;
+  ) => void
+>;
 
-export type MarkSerializer<S extends Schema = any> = Record<string,
-  (state: DocxSerializerState<S>, node: ProsemirrorNode<S>, mark: Mark<S>) => IRunOptions>;
+export type MarkSerializer<S extends Schema = any> = Record<
+  string,
+  (state: DocxSerializerState<S>, node: ProsemirrorNode<S>, mark: Mark<S>) => IRunOptions
+>;
 
 interface ImageBuffer {
   arrayBuffer: string | ArrayBuffer;
@@ -79,11 +83,7 @@ export class DocxSerializerState<S extends Schema = any> {
 
   private footnoteIds: string[];
 
-  constructor(
-    nodes: NodeSerializer<S>,
-    marks: MarkSerializer<S>,
-    options: Options,
-  ) {
+  constructor(nodes: NodeSerializer<S>, marks: MarkSerializer<S>, options: Options) {
     this.nodes = nodes;
     this.marks = marks;
     this.options = options ?? {};
@@ -144,11 +144,9 @@ export class DocxSerializerState<S extends Schema = any> {
     currentLink = undefined;
   }
 
-  openTable() {
-  }
+  openTable() {}
 
-  closeTable() {
-  }
+  closeTable() {}
 
   renderInline(parent: ProsemirrorNode<S>) {
     // Pop the stack over to this object when we encounter a link, and closeLink restores it
@@ -362,7 +360,7 @@ export class DocxSerializer<S extends Schema = any> {
     const state = new DocxSerializerState<S>(this.nodes, this.marks, options);
     state.renderContent(content);
     const f: Record<number, any> = footnotes.reduce((acc: Record<number, any>, cur, idx) => {
-      acc[idx + 1] = { children: [new Paragraph({ children: [new TextRun(cur)] }] }
+      acc[idx + 1] = { children: [new Paragraph({ children: [new TextRun(cur)] })] };
       return acc;
     }, {});
 
