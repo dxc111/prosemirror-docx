@@ -108,9 +108,13 @@ export const defaultMarks: MarkSerializer = {
     };
   },
   font_size(state, node, mark) {
-    return {
-      size: mark.attrs.fontSize,
-    };
+    try {
+      return {
+        size: parseInt(mark.attrs.fontSize || '', 10),
+      };
+    } catch (e) {
+      return {};
+    }
   },
   highlight(state, node, mark) {
     console.log('highlight', mark.attrs.color);
