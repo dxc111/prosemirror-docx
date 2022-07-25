@@ -134,7 +134,7 @@ export const defaultMarks: MarkSerializer = {
   },
   strike() {
     // doubleStrike!
-    return { strike: true };
+    return { doubleStrike: true };
   },
   underline() {
     return {
