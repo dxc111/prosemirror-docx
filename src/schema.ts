@@ -12,7 +12,7 @@ const colors = [
     value: 'rgba(255, 90, 90, 0.18)',
   },
   {
-    name: 'Purple',
+    name: 'magenta',
     value: 'rgba(166, 125, 255, 0.15)',
   },
   {
@@ -24,11 +24,11 @@ const colors = [
     value: 'rgba(52, 226, 216, 0.2)',
   },
   {
-    name: 'Orange',
+    name: 'darkYellow',
     value: 'rgba(255, 154, 61, 0.15)',
   },
   {
-    name: 'Grey',
+    name: 'lightGray',
     value: 'rgba(135, 135, 135, 0.2)',
   },
 ];
