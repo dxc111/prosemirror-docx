@@ -55,7 +55,7 @@ export type IMathOpts = {
 };
 
 let currentLink: { link: string; stack: ParagraphChild[] } | undefined;
-let currentTable: { rows: TableRow[]; stack: ParagraphChild[] } | undefined;
+const currentTable: Array<{ rows: TableRow[] }> = [];
 
 export class DocxSerializerState<S extends Schema = any> {
   nodes: NodeSerializer<S>;
@@ -246,7 +246,7 @@ export class DocxSerializerState<S extends Schema = any> {
     this.current.push(
       new TextRun({
         text,
-        color: currentLink ? '#007aff' : '#232424',
+        ...(currentLink ? { style: 'Hyperlink' } : {}),
         ...this.nextRunOpts,
         ...opts,
       }),

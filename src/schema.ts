@@ -73,9 +73,7 @@ export const defaultNodes: NodeSerializer = {
     state.renderInline(node);
     state.closeLink();
   },
-  table_cell(state, node) {
-
-  },
+  table_cell(state, node) {},
   table_header(state, node) {},
   table_row(state, node) {},
   table(state, node) {},
@@ -111,9 +109,7 @@ export const defaultMarks: MarkSerializer = {
   },
   font_size(state, node, mark) {
     return {
-      font: {
-        name: mark.attrs.font_family || 'Kaiti SC',
-      },
+      size: mark.attrs.fontSize,
     };
   },
   highlight(state, node, mark) {
