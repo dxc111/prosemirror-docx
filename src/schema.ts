@@ -2,6 +2,36 @@ import { HeadingLevel, ShadingType } from 'docx';
 import { DocxSerializer, MarkSerializer, NodeSerializer } from './serializer';
 import { getLatexFromNode, coverColorToHex } from './utils';
 
+const colors = [
+  {
+    name: 'Yellow',
+    value: 'rgba(255, 195, 0, 0.2)',
+  },
+  {
+    name: 'Red',
+    value: 'rgba(255, 90, 90, 0.18)',
+  },
+  {
+    name: 'Purple',
+    value: 'rgba(166, 125, 255, 0.15)',
+  },
+  {
+    name: 'Green',
+    value: 'rgba(158, 255, 0, 0.2)',
+  },
+  {
+    name: 'Blue',
+    value: 'rgba(52, 226, 216, 0.2)',
+  },
+  {
+    name: 'Orange',
+    value: 'rgba(255, 154, 61, 0.15)',
+  },
+  {
+    name: 'Grey',
+    value: 'rgba(135, 135, 135, 0.2)',
+  },
+];
 export const defaultNodes: NodeSerializer = {
   text(state, node) {
     state.text(node.text ?? '');
@@ -117,10 +147,13 @@ export const defaultMarks: MarkSerializer = {
     }
   },
   highlight(state, node, mark) {
-    console.log('highlight', mark.attrs.color);
-    return {
-      highlight: mark.attrs.color ? coverColorToHex(mark.attrs.color) : undefined,
-    };
+    const target = colors.find((c) => c.value === mark.attrs.color);
+    console.log('highlight', target);
+    return target
+      ? {
+          highlight: target.name.toLowerCase(),
+        }
+      : {};
   },
   abbr() {
     // TODO: abbreviation
