@@ -4,11 +4,11 @@ import { getLatexFromNode, coverColorToHex } from './utils';
 
 const colors = [
   {
-    name: 'Yellow',
+    name: 'yellow',
     value: 'rgba(255, 195, 0, 0.2)',
   },
   {
-    name: 'Red',
+    name: 'red',
     value: 'rgba(255, 90, 90, 0.18)',
   },
   {
@@ -16,11 +16,11 @@ const colors = [
     value: 'rgba(166, 125, 255, 0.15)',
   },
   {
-    name: 'Green',
+    name: 'green',
     value: 'rgba(158, 255, 0, 0.2)',
   },
   {
-    name: 'Blue',
+    name: 'blue',
     value: 'rgba(52, 226, 216, 0.2)',
   },
   {
@@ -151,7 +151,7 @@ export const defaultMarks: MarkSerializer = {
     console.log('highlight', target);
     return target
       ? {
-          highlight: target.name.toLowerCase(),
+          highlight: target.name,
         }
       : {};
   },
