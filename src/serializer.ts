@@ -157,11 +157,10 @@ export class DocxSerializerState<S extends Schema = any> {
       });
       this.current.push(new CommentRangeStart(node.attrs.createDate));
       this.renderInline(node);
-      this.current.push(new CommentRangeEnd(node.attrs.createDate));
       this.current.push(
+        new CommentRangeEnd(node.attrs.createDate),
         new TextRun({
           children: [new CommentReference(node.attrs.createDate)],
-          bold: true,
         }),
       );
     }
