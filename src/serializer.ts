@@ -23,6 +23,7 @@ import {
   CommentRangeStart,
   CommentRangeEnd,
   CommentReference,
+  ICommentOptions,
 } from 'docx';
 import { createNumbering, INumbering, NumberingStyles } from './numbering';
 import { createDocFromState, createShortId } from './utils';
@@ -85,7 +86,7 @@ export class DocxSerializerState<S extends Schema = any> {
 
   currentLink?: { link: string; children: IRunOptions[] };
 
-  comments: any = [];
+  comments: ICommentOptions[] = [];
 
   // Optionally add options
   nextParentParagraphOpts?: IParagraphOptions;

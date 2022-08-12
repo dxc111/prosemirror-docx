@@ -26,7 +26,7 @@ export function createDocFromState(
   return new Document({
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     footnotes, // @ts-ignore
-    comments: state.comments,
+    comments: { children: state.comments },
     numbering: {
       config: state.numbering,
     },
