@@ -40,9 +40,9 @@ export const defaultNodes: NodeSerializer = {
     state.renderInline(node);
     state.closeBlock(node);
   },
-  // comment(state, node) {
-  //   state.wrapComment(node);
-  // },
+  comment(state, node) {
+    state.wrapComment(node);
+  },
   heading(state, node) {
     state.renderInline(node);
     const heading = [
