@@ -20,6 +20,8 @@ import {
   TabStopType,
   TextRun,
   WidthType,
+  CommentRangeStart,
+  CommentRangeEnd,
 } from 'docx';
 import { createNumbering, INumbering, NumberingStyles } from './numbering';
 import { createDocFromState, createShortId } from './utils';
@@ -64,7 +66,6 @@ export type IMathOpts = {
 };
 
 let currentLink: { link: string; stack: ParagraphChild[] } | undefined;
-const currentTable: Array<{ rows: TableRow[] }> = [];
 
 export class DocxSerializerState<S extends Schema = any> {
   nodes: NodeSerializer<S>;
@@ -82,6 +83,8 @@ export class DocxSerializerState<S extends Schema = any> {
   current: ParagraphChild[] = [];
 
   currentLink?: { link: string; children: IRunOptions[] };
+
+  comments: any = [];
 
   // Optionally add options
   nextParentParagraphOpts?: IParagraphOptions;
@@ -142,6 +145,19 @@ export class DocxSerializerState<S extends Schema = any> {
       stack: this.current,
     };
     this.current = [];
+  }
+
+  wrapComment(node: ProsemirrorNode) {
+    if (node.type.name === 'comment') {
+      this.comments.push({
+        id: node.attrs.createDate,
+        text: node.attrs.comment,
+        date: new Date(node.attrs.createDate),
+      });
+      this.current.push(new CommentRangeStart(node.attrs.createDate));
+      this.renderInline(node);
+      this.current.push(new CommentRangeEnd(node.attrs.createDate));
+    }
   }
 
   closeLink() {

@@ -108,7 +108,7 @@ export const defaultNodes: NodeSerializer = {
   table_row(state, node) {},
   table(state, node) {
     state.table(node);
-    console.log(state);
+    // console.log(state);
   },
   default(state, node) {
     if (node.isAtom || node.isLeaf) return;
@@ -151,7 +151,7 @@ export const defaultMarks: MarkSerializer = {
   },
   highlight(state, node, mark) {
     const target = colors.find((c) => c.value === mark.attrs.color);
-    console.log('highlight', target);
+    // console.log('highlight', target);
     return target
       ? {
           highlight: target.name,
