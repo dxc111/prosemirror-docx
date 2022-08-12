@@ -154,6 +154,7 @@ export class DocxSerializerState<S extends Schema = any> {
         id: node.attrs.createDate,
         text: node.attrs.comment,
         date: new Date(node.attrs.createDate),
+        author: 'unknown',
       });
       this.current.push(new CommentRangeStart(node.attrs.createDate));
       this.renderInline(node);
