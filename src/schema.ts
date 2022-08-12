@@ -34,7 +34,7 @@ const colors = [
 ];
 export const defaultNodes: NodeSerializer = {
   text(state, node) {
-    state.text(node.text ?? '');
+    state.text((node.text ?? '').replace(/\u200b/g, ''));
   },
   paragraph(state, node) {
     state.renderInline(node);
@@ -106,7 +106,9 @@ export const defaultNodes: NodeSerializer = {
   table_cell(state, node) {},
   table_header(state, node) {},
   table_row(state, node) {},
-  table(state, node) {},
+  table(state, node) {
+    state.table(node);
+  },
   default(state, node) {
     if (node.isAtom || node.isLeaf) return;
 

@@ -16,10 +16,18 @@ import {
   AlignmentType,
   TableRow,
   FootnoteReferenceRun,
+  TableCell,
+  Table,
+  ITableCellOptions,
 } from 'docx';
 import { INumbering, createNumbering, NumberingStyles } from './numbering';
 import { createDocFromState, createShortId } from './utils';
 
+type Mutable<T> = {
+  -readonly [k in keyof T]: T[k];
+};
+
+const MAX_IMAGE_WIDTH = 600;
 // This is duplicated from @curvenote/schema
 export type AlignOptions = 'left' | 'center' | 'right';
 
@@ -82,6 +90,8 @@ export class DocxSerializerState<S extends Schema = any> {
   private footnoteIdx: number;
 
   private footnoteIds: string[];
+
+  private maxImageWidth = 600;
 
   constructor(nodes: NodeSerializer<S>, marks: MarkSerializer<S>, options: Options) {
     this.nodes = nodes;
@@ -327,6 +337,44 @@ export class DocxSerializerState<S extends Schema = any> {
         children: [new TextRun(`${kind} `), new SequentialIdentifier(kind)],
       }),
     );
+  }
+
+  table(node: ProsemirrorNode<S>) {
+    const actualChildren = this.children;
+    const rows: TableRow[] = [];
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    node.content.forEach(({ content: rowContent }) => {
+      const cells: TableCell[] = [];
+      // Check if all cells are headers in this row
+      let tableHeader = true;
+      rowContent.forEach((cell: { type: { name: string } }) => {
+        if (cell.type.name !== 'table_header') {
+          tableHeader = false;
+        }
+      });
+      // This scales images inside of tables
+      this.maxImageWidth = MAX_IMAGE_WIDTH / rowContent.childCount;
+      rowContent.forEach((cell: ProsemirrorNode<S>) => {
+        this.children = [];
+        this.renderContent(cell);
+        const tableCellOpts: Mutable<ITableCellOptions> = { children: this.children };
+        const colspan = cell.attrs.colspan ?? 1;
+        const rowspan = cell.attrs.rowspan ?? 1;
+        if (colspan > 1) tableCellOpts.columnSpan = colspan;
+        if (rowspan > 1) tableCellOpts.rowSpan = rowspan;
+        cells.push(new TableCell(tableCellOpts));
+      });
+      rows.push(new TableRow({ children: cells, tableHeader }));
+    });
+    this.maxImageWidth = MAX_IMAGE_WIDTH;
+    const table = new Table({ rows });
+    if (table instanceof Paragraph) {
+      actualChildren.push(table);
+    }
+    // If there are multiple tables, this seperates them
+    actualChildren.push(new Paragraph(''));
+    this.children = actualChildren;
   }
 
   closeBlock(node: ProsemirrorNode<S>, props?: IParagraphOptions) {
