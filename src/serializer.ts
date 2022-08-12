@@ -369,9 +369,11 @@ export class DocxSerializerState<S extends Schema = any> {
     });
     this.maxImageWidth = MAX_IMAGE_WIDTH;
     const table = new Table({ rows });
-    if (table instanceof Paragraph) {
-      actualChildren.push(table);
-    }
+    // if (table instanceof Paragraph) {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    actualChildren.push(table);
+    // }
     // If there are multiple tables, this seperates them
     actualChildren.push(new Paragraph(''));
     this.children = actualChildren;

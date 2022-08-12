@@ -108,6 +108,7 @@ export const defaultNodes: NodeSerializer = {
   table_row(state, node) {},
   table(state, node) {
     state.table(node);
+    console.log(state);
   },
   default(state, node) {
     if (node.isAtom || node.isLeaf) return;
