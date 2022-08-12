@@ -113,7 +113,6 @@ export class DocxSerializerState<S extends Schema = any> {
   }
 
   render(node: ProsemirrorNode<S>, parent: ProsemirrorNode<S>, index: number) {
-    if (typeof parent === 'number') throw new Error('!');
     const target = this.nodes[node.type.name] || this.nodes.default;
     if (!target) throw new Error(`Token type \`${node.type.name}\` not supported by Word renderer`);
     target(this, node, parent, index);
@@ -148,22 +147,24 @@ export class DocxSerializerState<S extends Schema = any> {
     this.current = [];
   }
 
+  curIdx = 0;
+
   wrapComment(node: ProsemirrorNode) {
     if (node.type.name === 'comment') {
       this.comments.push({
-        id: node.attrs.createDate,
+        id: this.curIdx,
         text: node.attrs.comment,
         date: new Date(node.attrs.createDate),
-        author: 'unknown',
       });
-      this.current.push(new CommentRangeStart(node.attrs.createDate));
+      this.current.push(new CommentRangeStart(this.curIdx));
       this.renderInline(node);
       this.current.push(
-        new CommentRangeEnd(node.attrs.createDate),
+        new CommentRangeEnd(this.curIdx),
         new TextRun({
-          children: [new CommentReference(node.attrs.createDate)],
+          children: [new CommentReference(this.curIdx)],
         }),
       );
+      this.curIdx += 1;
     }
   }
 
