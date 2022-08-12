@@ -22,6 +22,7 @@ import {
   WidthType,
   CommentRangeStart,
   CommentRangeEnd,
+  CommentReference,
 } from 'docx';
 import { createNumbering, INumbering, NumberingStyles } from './numbering';
 import { createDocFromState, createShortId } from './utils';
@@ -147,7 +148,6 @@ export class DocxSerializerState<S extends Schema = any> {
     this.current = [];
   }
 
-  // TODO: docx doesn't support this
   wrapComment(node: ProsemirrorNode) {
     if (node.type.name === 'comment') {
       this.comments.push({
@@ -158,6 +158,12 @@ export class DocxSerializerState<S extends Schema = any> {
       this.current.push(new CommentRangeStart(node.attrs.createDate));
       this.renderInline(node);
       this.current.push(new CommentRangeEnd(node.attrs.createDate));
+      this.current.push(
+        new TextRun({
+          children: [new CommentReference(node.attrs.createDate)],
+          bold: true,
+        }),
+      );
     }
   }
 
