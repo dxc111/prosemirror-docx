@@ -1,26 +1,27 @@
-import { Node as ProsemirrorNode, Schema, Mark } from 'prosemirror-model';
+import { Mark, Node as ProsemirrorNode, Schema } from 'prosemirror-model';
 import {
+  AlignmentType,
+  Bookmark,
+  ExternalHyperlink,
+  FootnoteReferenceRun,
+  ImageRun,
   IParagraphOptions,
   IRunOptions,
-  Paragraph,
-  TextRun,
-  ExternalHyperlink,
-  ParagraphChild,
-  MathRun,
-  Math,
-  TabStopType,
-  TabStopPosition,
-  SequentialIdentifier,
-  Bookmark,
-  ImageRun,
-  AlignmentType,
-  TableRow,
-  FootnoteReferenceRun,
-  TableCell,
-  Table,
   ITableCellOptions,
+  Math,
+  MathRun,
+  Paragraph,
+  ParagraphChild,
+  SequentialIdentifier,
+  Table,
+  TableCell,
+  TableRow,
+  TabStopPosition,
+  TabStopType,
+  TextRun,
+  WidthType,
 } from 'docx';
-import { INumbering, createNumbering, NumberingStyles } from './numbering';
+import { createNumbering, INumbering, NumberingStyles } from './numbering';
 import { createDocFromState, createShortId } from './utils';
 
 type Mutable<T> = {
@@ -355,10 +356,17 @@ export class DocxSerializerState<S extends Schema = any> {
       });
       // This scales images inside of tables
       this.maxImageWidth = MAX_IMAGE_WIDTH / rowContent.childCount;
+      const percent = 100 / (rowContent.childCount || 1);
       rowContent.forEach((cell: ProsemirrorNode<S>) => {
         this.children = [];
         this.renderContent(cell);
-        const tableCellOpts: Mutable<ITableCellOptions> = { children: this.children };
+        const tableCellOpts: Mutable<ITableCellOptions> = {
+          children: this.children,
+          width: {
+            type: WidthType.PERCENTAGE,
+            size: percent,
+          },
+        };
         const colspan = cell.attrs.colspan ?? 1;
         const rowspan = cell.attrs.rowspan ?? 1;
         if (colspan > 1) tableCellOpts.columnSpan = colspan;
