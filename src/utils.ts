@@ -22,6 +22,7 @@ export function createDocFromState(
   footerText?: string,
   footnotes: Record<number, any> = {},
 ) {
+  console.log('createDocFromState', state);
   return new Document({
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     footnotes, // @ts-ignore
