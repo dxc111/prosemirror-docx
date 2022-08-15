@@ -416,7 +416,7 @@ export class DocxSerializerState<S extends Schema = any> {
   columns(node: ProsemirrorNode<S>) {
     if (node.childCount < 1) return;
     const actualChildren = this.children;
-    const columns = [];
+    this.children = [];
 
     node.content.forEach((column: ProsemirrorNode<S>, _, idx) => {
       if (idx !== 0) {
