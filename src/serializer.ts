@@ -436,6 +436,7 @@ export class DocxSerializerState<S extends Schema = any> {
       },
       children: this.children,
     });
+    actualChildren.push(new Paragraph(''));
     this.children = actualChildren;
   }
 

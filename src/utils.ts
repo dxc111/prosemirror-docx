@@ -23,28 +23,41 @@ export function createDocFromState(
   footnotes: Record<number, any> = {},
 ) {
   console.log('createDocFromState', state);
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  // eslint-disable-next-line array-callback-return
+  const sections = state.children.reduce((res: any[], cur: any) => {
+    if (!cur.properties) {
+      if (res[res.length - 1]) {
+        res[res.length - 1].children.push(cur);
+      } else {
+        res.push({
+          properties: {
+            type: SectionType.CONTINUOUS,
+          },
+          children: [cur],
+          footers: footerText
+            ? {
+                default: new Footer({
+                  children: [new Paragraph({ text: footerText, alignment: AlignmentType.CENTER })],
+                }),
+              }
+            : undefined,
+        });
+      }
+    } else {
+      res.push(cur);
+    }
+  }, []);
+  console.log(sections);
   return new Document({
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     footnotes, // @ts-ignore
     comments: { children: state.comments },
     numbering: {
       config: state.numbering,
-    },
-    sections: [
-      {
-        properties: {
-          type: SectionType.CONTINUOUS,
-        },
-        children: state.children,
-        footers: footerText
-          ? {
-              default: new Footer({
-                children: [new Paragraph({ text: footerText, alignment: AlignmentType.CENTER })],
-              }),
-            }
-          : undefined,
-      },
-    ],
+    }, // @ts-ignore
+    sections,
   });
 }
 
