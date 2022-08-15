@@ -24,6 +24,7 @@ import {
   CommentRangeEnd,
   CommentReference,
   ICommentOptions,
+  ColumnBreak,
 } from 'docx';
 import { createNumbering, INumbering, NumberingStyles } from './numbering';
 import { createDocFromState, createShortId } from './utils';
@@ -76,13 +77,13 @@ export class DocxSerializerState<S extends Schema = any> {
 
   marks: MarkSerializer<S>;
 
-  children: Paragraph[];
+  children: Paragraph[] | any;
 
   numbering: INumbering[];
 
   nextRunOpts?: IRunOptions;
 
-  current: ParagraphChild[] = [];
+  current: ParagraphChild[] | any = [];
 
   currentLink?: { link: string; children: IRunOptions[] };
 
@@ -410,6 +411,31 @@ export class DocxSerializerState<S extends Schema = any> {
     // If there are multiple tables, this seperates them
     actualChildren.push(new Paragraph(''));
     this.children = actualChildren;
+  }
+
+  columns(node: ProsemirrorNode<S>) {
+    if (node.childCount < 1) return;
+    const actualChildren = this.children;
+
+    node.content.forEach((column: ProsemirrorNode<S>, _, idx) => {
+      if (idx !== 0) {
+        this.children.push(new Paragraph({ children: [new ColumnBreak()] }));
+      }
+      column.content.forEach((child) => {
+        this.renderContent(child);
+      });
+
+      this.children.push({
+        properties: {
+          column: {
+            space: 708,
+            count: 2,
+          },
+        },
+        children: this.children,
+      });
+      this.children = actualChildren;
+    });
   }
 
   closeBlock(node: ProsemirrorNode<S>, props?: IParagraphOptions) {
