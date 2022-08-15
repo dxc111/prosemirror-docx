@@ -412,7 +412,7 @@ export class DocxSerializerState<S extends Schema = any> {
     this.maxImageWidth = MAX_IMAGE_WIDTH;
     const table = new Table({
       rows,
-      columnWidths: new Array(colCount).fill(0).map((_) => (percent / 100) * 9010),
+      columnWidths: new Array(colCount).fill(0).map(() => 9010 / (colCount || 1)),
       // width: {
       //   type: WidthType.DXA,
       //   size: 9010,
