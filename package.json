@@ -1,6 +1,6 @@
 {
   "name": "prosemirror-docx-web",
-  "version": "0.0.56",
+  "version": "0.0.57",
   "description": "Export from a prosemirror document to Microsoft word forked from curvenote/prosemirror-docx",
   "author": "dxc111 <dx131477@outlook.com>",
   "license": "MIT",
