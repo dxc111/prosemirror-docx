@@ -420,12 +420,14 @@ export class DocxSerializerState<S extends Schema = any> {
     this.children = [];
 
     node.content.forEach((column: ProsemirrorNode<S>, _, idx) => {
+      console.log(column);
       if (idx !== 0) {
         this.children.push(new Paragraph({ children: [new ColumnBreak()] }));
       }
 
       column.content.forEach((child) => {
         this.renderContent(child);
+        console.log(child);
       });
     });
     actualChildren.push({
