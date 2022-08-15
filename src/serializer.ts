@@ -435,8 +435,8 @@ export class DocxSerializerState<S extends Schema = any> {
       if (idx !== 0) {
         columnsItems.push(new Paragraph({ children: [new ColumnBreak()] }));
       }
-      columnsWidth.push(new Column({ width: parseFloat(node.attrs.basis) }));
-      this.maxImageWidth = (MAX_IMAGE_WIDTH * parseFloat(node.attrs.basis)) / 100;
+      columnsWidth.push(new Column({ width: (parseFloat(column.attrs.basis) / 100) * 9010 }));
+      this.maxImageWidth = (MAX_IMAGE_WIDTH * parseFloat(column.attrs.basis)) / 100;
       this.renderContent(column);
       // column.content.forEach((child) => {
       //   this.renderContent(child);
