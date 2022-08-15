@@ -427,7 +427,7 @@ export class DocxSerializerState<S extends Schema = any> {
         this.renderContent(child);
       });
     });
-    this.children.push({
+    actualChildren.push({
       properties: {
         column: {
           space: 708,
