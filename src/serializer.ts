@@ -374,6 +374,8 @@ export class DocxSerializerState<S extends Schema = any> {
   table(node: ProsemirrorNode<S>) {
     const actualChildren = this.children;
     const rows: TableRow[] = [];
+    let percent = 0;
+    let colCount = 0;
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     node.content.forEach(({ content: rowContent }) => {
@@ -387,7 +389,8 @@ export class DocxSerializerState<S extends Schema = any> {
       });
       // This scales images inside of tables
       this.maxImageWidth = MAX_IMAGE_WIDTH / rowContent.childCount;
-      const percent = 100 / (rowContent.childCount || 1);
+      percent = percent || 100 / (rowContent.childCount || 1);
+      colCount = rowContent.childCount;
       rowContent.forEach((cell: ProsemirrorNode<S>) => {
         this.children = [];
         this.renderContent(cell);
@@ -409,10 +412,11 @@ export class DocxSerializerState<S extends Schema = any> {
     this.maxImageWidth = MAX_IMAGE_WIDTH;
     const table = new Table({
       rows,
-      width: {
-        type: WidthType.DXA,
-        size: 9010,
-      },
+      columnWidths: new Array(colCount).fill(0).map((_) => (percent / 100) * 9010),
+      // width: {
+      //   type: WidthType.DXA,
+      //   size: 9010,
+      // },
     });
     // if (table instanceof Paragraph) {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
