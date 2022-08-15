@@ -416,26 +416,27 @@ export class DocxSerializerState<S extends Schema = any> {
   columns(node: ProsemirrorNode<S>) {
     if (node.childCount < 1) return;
     const actualChildren = this.children;
+    const columns = [];
 
     node.content.forEach((column: ProsemirrorNode<S>, _, idx) => {
       if (idx !== 0) {
         this.children.push(new Paragraph({ children: [new ColumnBreak()] }));
       }
+
       column.content.forEach((child) => {
         this.renderContent(child);
       });
-
-      this.children.push({
-        properties: {
-          column: {
-            space: 708,
-            count: 2,
-          },
-        },
-        children: this.children,
-      });
-      this.children = actualChildren;
     });
+    this.children.push({
+      properties: {
+        column: {
+          space: 708,
+          count: 2,
+        },
+      },
+      children: this.children,
+    });
+    this.children = actualChildren;
   }
 
   closeBlock(node: ProsemirrorNode<S>, props?: IParagraphOptions) {
