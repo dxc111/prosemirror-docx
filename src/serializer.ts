@@ -2,8 +2,13 @@ import { Mark, Node as ProsemirrorNode, Schema } from 'prosemirror-model';
 import {
   AlignmentType,
   Bookmark,
+  ColumnBreak,
+  CommentRangeEnd,
+  CommentRangeStart,
+  CommentReference,
   ExternalHyperlink,
   FootnoteReferenceRun,
+  ICommentOptions,
   ImageRun,
   IParagraphOptions,
   IRunOptions,
@@ -12,6 +17,7 @@ import {
   MathRun,
   Paragraph,
   ParagraphChild,
+  SectionType,
   SequentialIdentifier,
   Table,
   TableCell,
@@ -20,12 +26,6 @@ import {
   TabStopType,
   TextRun,
   WidthType,
-  CommentRangeStart,
-  CommentRangeEnd,
-  CommentReference,
-  ICommentOptions,
-  ColumnBreak,
-  SectionType,
 } from 'docx';
 import { createNumbering, INumbering, NumberingStyles } from './numbering';
 import { createDocFromState, createShortId } from './utils';
@@ -403,7 +403,13 @@ export class DocxSerializerState<S extends Schema = any> {
       rows.push(new TableRow({ children: cells, tableHeader }));
     });
     this.maxImageWidth = MAX_IMAGE_WIDTH;
-    const table = new Table({ rows });
+    const table = new Table({
+      rows,
+      width: {
+        type: WidthType.PERCENTAGE,
+        size: 100,
+      },
+    });
     // if (table instanceof Paragraph) {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
@@ -425,9 +431,10 @@ export class DocxSerializerState<S extends Schema = any> {
         columnsItems.push(new Paragraph({ children: [new ColumnBreak()] }));
       }
 
-      column.content.forEach((child) => {
-        this.renderContent(child);
-      });
+      this.renderContent(column);
+      // column.content.forEach((child) => {
+      //   this.renderContent(child);
+      // });
 
       columnsItems.push(...this.children);
     });
