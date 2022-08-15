@@ -417,18 +417,21 @@ export class DocxSerializerState<S extends Schema = any> {
   columns(node: ProsemirrorNode<S>) {
     if (node.childCount < 1) return;
     const actualChildren = this.children;
-    this.children = [];
+    const columnsItems: Paragraph[] = [];
 
     node.content.forEach((column: ProsemirrorNode<S>, _, idx) => {
+      this.children = [];
       if (idx !== 0) {
-        this.children.push(new Paragraph({ children: [new ColumnBreak()] }));
+        columnsItems.push(new Paragraph({ children: [new ColumnBreak()] }));
       }
 
       column.content.forEach((child) => {
         this.renderContent(child);
       });
-      console.log(this.children);
+
+      columnsItems.push(...this.children);
     });
+    console.log(columnsItems);
     actualChildren.push({
       properties: {
         type: SectionType.CONTINUOUS,
@@ -437,7 +440,7 @@ export class DocxSerializerState<S extends Schema = any> {
           count: 2,
         },
       },
-      children: this.children,
+      children: columnsItems,
     });
     actualChildren.push(new Paragraph(''));
     this.children = actualChildren;
