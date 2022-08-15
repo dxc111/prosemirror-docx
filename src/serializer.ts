@@ -2,6 +2,7 @@ import { Mark, Node as ProsemirrorNode, Schema } from 'prosemirror-model';
 import {
   AlignmentType,
   Bookmark,
+  Column,
   ColumnBreak,
   CommentRangeEnd,
   CommentRangeStart,
@@ -330,15 +331,18 @@ export class DocxSerializerState<S extends Schema = any> {
     this.current.push(new FootnoteReferenceRun(this.footnoteIdx));
   }
 
-  image(src: string, align: AlignOptions = 'center') {
-    const { arrayBuffer, width, height } = this.options.getImageBuffer(src);
+  image(src: string, align: AlignOptions = 'center', widthPercent = 90) {
+    const { arrayBuffer, width: rawW, height: rawH } = this.options.getImageBuffer(src);
+
+    const aspect = rawH / rawW;
+    const width = this.maxImageWidth * (widthPercent / 100);
 
     this.current.push(
       new ImageRun({
         data: arrayBuffer,
         transformation: {
           width,
-          height,
+          height: width * aspect,
         },
       }),
     );
@@ -406,8 +410,8 @@ export class DocxSerializerState<S extends Schema = any> {
     const table = new Table({
       rows,
       width: {
-        type: WidthType.PERCENTAGE,
-        size: 100,
+        type: WidthType.DXA,
+        size: 9010,
       },
     });
     // if (table instanceof Paragraph) {
@@ -424,13 +428,15 @@ export class DocxSerializerState<S extends Schema = any> {
     if (node.childCount < 1) return;
     const actualChildren = this.children;
     const columnsItems: Paragraph[] = [];
+    const columnsWidth: Column[] = [];
 
     node.content.forEach((column: ProsemirrorNode<S>, _, idx) => {
       this.children = [];
       if (idx !== 0) {
         columnsItems.push(new Paragraph({ children: [new ColumnBreak()] }));
       }
-
+      columnsWidth.push(new Column({ width: parseFloat(node.attrs.basis) }));
+      this.maxImageWidth = (MAX_IMAGE_WIDTH * parseFloat(node.attrs.basis)) / 100;
       this.renderContent(column);
       // column.content.forEach((child) => {
       //   this.renderContent(child);
@@ -438,19 +444,22 @@ export class DocxSerializerState<S extends Schema = any> {
 
       columnsItems.push(...this.children);
     });
-    console.log(columnsItems);
+
     actualChildren.push({
       properties: {
         type: SectionType.CONTINUOUS,
         column: {
           space: 708,
-          count: 2,
+          count: node.childCount,
+          equalWidth: false,
+          children: columnsWidth,
         },
       },
       children: columnsItems,
     });
     actualChildren.push(new Paragraph(''));
     this.children = actualChildren;
+    this.maxImageWidth = MAX_IMAGE_WIDTH;
   }
 
   closeBlock(node: ProsemirrorNode<S>, props?: IParagraphOptions) {
