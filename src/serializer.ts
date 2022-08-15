@@ -25,6 +25,7 @@ import {
   CommentReference,
   ICommentOptions,
   ColumnBreak,
+  SectionType,
 } from 'docx';
 import { createNumbering, INumbering, NumberingStyles } from './numbering';
 import { createDocFromState, createShortId } from './utils';
@@ -429,6 +430,7 @@ export class DocxSerializerState<S extends Schema = any> {
     });
     actualChildren.push({
       properties: {
+        type: SectionType.CONTINUOUS,
         column: {
           space: 708,
           count: 2,

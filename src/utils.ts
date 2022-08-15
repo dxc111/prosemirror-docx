@@ -27,8 +27,8 @@ export function createDocFromState(
   // @ts-ignore
   // eslint-disable-next-line array-callback-return
   const sections = state.children.reduce((res: any[], cur: any) => {
-    if (!cur.properties) {
-      if (res[res.length - 1]) {
+    if (!cur.properties?.column) {
+      if (res[res.length - 1] && !res[res.length - 1].properties?.column) {
         res[res.length - 1].children.push(cur);
       } else {
         res.push({
@@ -46,6 +46,14 @@ export function createDocFromState(
         });
       }
     } else {
+      // eslint-disable-next-line no-param-reassign
+      cur.footers = footerText
+        ? {
+            default: new Footer({
+              children: [new Paragraph({ text: footerText, alignment: AlignmentType.CENTER })],
+            }),
+          }
+        : undefined;
       res.push(cur);
     }
   }, []);
@@ -56,6 +64,7 @@ export function createDocFromState(
     comments: { children: state.comments },
     numbering: {
       config: state.numbering,
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     }, // @ts-ignore
     sections,
   });
