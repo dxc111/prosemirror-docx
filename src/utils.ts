@@ -23,9 +23,7 @@ export function createDocFromState(
   footnotes: Record<number, any> = {},
 ) {
   console.log('createDocFromState', state);
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  // eslint-disable-next-line array-callback-return
+
   const sections = state.children.reduce((res: any[], cur: any) => {
     if (!cur.properties?.column) {
       if (res[res.length - 1] && !res[res.length - 1].properties?.column) {
@@ -56,6 +54,7 @@ export function createDocFromState(
         : undefined;
       res.push(cur);
     }
+    return res;
   }, []);
   console.log(sections);
   return new Document({
