@@ -57,14 +57,16 @@ export const defaultNodes: NodeSerializer = {
   },
   blockquote(state, node) {
     state.renderContent(node, {
-      style: 'Intense Quote',
+      style: 'IntenseQuote',
       // indent: { left: 250 },
       // border: { left: { style: BorderStyle.THICK_THIN_MEDIUM_GAP, size: 40 } },
     });
   },
   code_block(state, node) {
     // TODO: something for code
-    state.renderContent(node);
+    state.renderContent(node, {
+      style: 'code',
+    });
     state.closeBlock(node);
   },
   horizontal_rule(state, node) {

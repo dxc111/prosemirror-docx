@@ -80,6 +80,42 @@ export function createDocFromState(
             alignment: AlignmentType.CENTER,
           },
         },
+        {
+          id: 'code',
+          name: 'Code',
+          basedOn: 'Normal',
+          next: 'Normal',
+          run: {
+            color: '999999',
+            italics: true,
+            size: 14,
+          },
+          paragraph: {
+            spacing: {
+              before: 30,
+              after: 30,
+              line: 276,
+            },
+            indent: { left: 30 },
+          },
+        },
+        {
+          id: 'IntenseQuote',
+          name: 'IntenseQuote',
+          basedOn: 'Normal',
+          next: 'Normal',
+          run: {
+            italics: true,
+          },
+          paragraph: {
+            spacing: {
+              before: 30,
+              after: 30,
+              line: 276,
+            },
+            indent: { left: 30 },
+          },
+        },
       ],
     },
     numbering: {
