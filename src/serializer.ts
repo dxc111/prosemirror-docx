@@ -365,6 +365,16 @@ export class DocxSerializerState<S extends Schema = any> {
     });
   }
 
+  addAside(text = '') {
+    this.children.push(
+      new Paragraph({
+        text,
+        style: 'aside',
+        alignment: AlignmentType.CENTER,
+      }),
+    );
+  }
+
   captionLabel(id: string, kind: 'Figure' | 'Table') {
     this.current.push(
       new Bookmark({

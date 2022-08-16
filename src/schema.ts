@@ -59,7 +59,7 @@ export const defaultNodes: NodeSerializer = {
     state.renderContent(node, {
       style: 'Intense Quote',
       // indent: { left: 250 },
-      border: { left: { style: BorderStyle.THICK_THIN_MEDIUM_GAP, size: 40, color: 'red' } },
+      // border: { left: { style: BorderStyle.THICK_THIN_MEDIUM_GAP, size: 40 } },
     });
   },
   code_block(state, node) {
@@ -89,9 +89,10 @@ export const defaultNodes: NodeSerializer = {
   },
   // Presentational
   image(state, node) {
-    const { src } = node.attrs;
-    state.image(src);
+    const { src, title = '', layout = 'center', width = 100 } = node.attrs;
+    state.image(src, layout, width);
     state.closeBlock(node);
+    if (title) state.addAside(title);
   },
   // Technical
   latex(state, node) {
