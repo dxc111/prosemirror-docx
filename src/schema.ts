@@ -64,10 +64,11 @@ export const defaultNodes: NodeSerializer = {
   },
   code_block(state, node) {
     // TODO: something for code
-    state.renderContent(node, {
-      style: 'code',
-    });
-    state.closeBlock(node);
+    // state.renderContent(node, {
+    //   style: 'code',
+    // });
+    // state.closeBlock(node);
+    state.addCodeBlock(node);
   },
   horizontal_rule(state, node) {
     // Kinda hacky, but this works to insert two paragraphs, the first with a break

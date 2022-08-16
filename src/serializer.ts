@@ -286,27 +286,14 @@ export class DocxSerializerState<S extends Schema = any> {
 
   text(text: string | null | undefined, opts?: IRunOptions) {
     if (!text) return;
-    if (text.includes('\n')) {
-      text.split('\n').forEach((t: string, idx, arr) => {
-        this.current.push(
-          new TextRun({
-            text: t,
-            ...(currentLink ? { style: 'Hyperlink' } : {}),
-            ...((text.endsWith('\n') || idx < arr.length - 1) && idx > 0 ? { break: 1 } : {}),
-            ...this.nextRunOpts,
-            ...opts,
-          }),
-        );
-      });
-    } else
-      this.current.push(
-        new TextRun({
-          text,
-          ...(currentLink ? { style: 'Hyperlink' } : {}),
-          ...this.nextRunOpts,
-          ...opts,
-        }),
-      );
+    this.current.push(
+      new TextRun({
+        text,
+        ...(currentLink ? { style: 'Hyperlink' } : {}),
+        ...this.nextRunOpts,
+        ...opts,
+      }),
+    );
     delete this.nextRunOpts;
   }
 
@@ -386,6 +373,19 @@ export class DocxSerializerState<S extends Schema = any> {
         style: 'aside',
       }),
     );
+  }
+
+  addCodeBlock(node: ProsemirrorNode) {
+    if (node.textContent) {
+      node.textContent.split('\n').forEach((text) => {
+        this.children.push(
+          new Paragraph({
+            text,
+            style: 'code',
+          }),
+        );
+      });
+    }
   }
 
   captionLabel(id: string, kind: 'Figure' | 'Table') {
