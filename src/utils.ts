@@ -73,7 +73,7 @@ export function createDocFromState(
           run: {
             color: '999999',
             italics: true,
-            size: 14,
+            size: 18,
           },
           paragraph: {
             spacing: {
@@ -90,7 +90,7 @@ export function createDocFromState(
           run: {
             color: '6e7d8b',
             italics: true,
-            size: 14,
+            size: 16,
           },
           paragraph: {
             spacing: {
