@@ -370,7 +370,7 @@ export class DocxSerializerState<S extends Schema = any> {
       new Paragraph({
         text,
         style: 'aside',
-        alignment: AlignmentType.CENTER,
+        // alignment: AlignmentType.CENTER,
       }),
     );
   }
