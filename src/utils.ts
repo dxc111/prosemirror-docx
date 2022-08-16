@@ -88,7 +88,7 @@ export function createDocFromState(
           basedOn: 'Normal',
           next: 'Normal',
           run: {
-            color: '999999',
+            color: '6e7d8b',
             italics: true,
             size: 14,
           },
@@ -110,11 +110,6 @@ export function createDocFromState(
             italics: true,
           },
           paragraph: {
-            spacing: {
-              before: 30,
-              after: 30,
-              line: 276,
-            },
             indent: { left: 250 },
           },
         },
