@@ -96,7 +96,7 @@ export function createDocFromState(
               after: 30,
               line: 276,
             },
-            indent: { left: 30 },
+            indent: { left: 250 },
           },
         },
         {

@@ -286,14 +286,27 @@ export class DocxSerializerState<S extends Schema = any> {
 
   text(text: string | null | undefined, opts?: IRunOptions) {
     if (!text) return;
-    this.current.push(
-      new TextRun({
-        text,
-        ...(currentLink ? { style: 'Hyperlink' } : {}),
-        ...this.nextRunOpts,
-        ...opts,
-      }),
-    );
+    if (text.includes('\n')) {
+      text.split('\n').forEach((t: string, idx, arr) => {
+        this.current.push(
+          new TextRun({
+            text: t,
+            ...(currentLink ? { style: 'Hyperlink' } : {}),
+            ...(text.endsWith('\n') || idx < arr.length - 1 ? { break: 1 } : {}),
+            ...this.nextRunOpts,
+            ...opts,
+          }),
+        );
+      });
+    } else
+      this.current.push(
+        new TextRun({
+          text,
+          ...(currentLink ? { style: 'Hyperlink' } : {}),
+          ...this.nextRunOpts,
+          ...opts,
+        }),
+      );
     delete this.nextRunOpts;
   }
 
