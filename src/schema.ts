@@ -58,6 +58,7 @@ export const defaultNodes: NodeSerializer = {
   blockquote(state, node) {
     state.renderContent(node, {
       style: 'IntenseQuote',
+      border: { left: { style: BorderStyle.THICK, size: 20, color: '999999', space: 40 } },
       // indent: { left: 250 },
       // border: { left: { style: BorderStyle.THICK_THIN_MEDIUM_GAP, size: 40 } },
     });

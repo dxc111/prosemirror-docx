@@ -7,6 +7,7 @@ import {
   Packer,
   Paragraph,
   SectionType,
+  BorderStyle,
 } from 'docx';
 import { Node as ProsemirrorNode } from 'prosemirror-model';
 
@@ -58,6 +59,7 @@ export function createDocFromState(
   }, []);
   console.log(sections);
   return new Document({
+    background: undefined,
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     footnotes, // @ts-ignore
     comments: { children: state.comments },
