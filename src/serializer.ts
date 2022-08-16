@@ -292,7 +292,7 @@ export class DocxSerializerState<S extends Schema = any> {
           new TextRun({
             text: t,
             ...(currentLink ? { style: 'Hyperlink' } : {}),
-            ...(text.endsWith('\n') || idx < arr.length - 1 ? { break: 1 } : {}),
+            ...((text.endsWith('\n') || idx < arr.length - 1) && idx > 0 ? { break: 1 } : {}),
             ...this.nextRunOpts,
             ...opts,
           }),
