@@ -61,6 +61,27 @@ export function createDocFromState(
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     footnotes, // @ts-ignore
     comments: { children: state.comments },
+    styles: {
+      paragraphStyles: [
+        {
+          id: 'aside',
+          name: 'Aside',
+          basedOn: 'Normal',
+          next: 'Normal',
+          run: {
+            color: '999999',
+            italics: true,
+            size: 14,
+          },
+          paragraph: {
+            spacing: {
+              line: 276,
+            },
+            alignment: AlignmentType.CENTER,
+          },
+        },
+      ],
+    },
     numbering: {
       config: state.numbering,
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment

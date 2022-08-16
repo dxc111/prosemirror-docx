@@ -20,6 +20,7 @@ import {
   ParagraphChild,
   SectionType,
   SequentialIdentifier,
+  ShadingType,
   Table,
   TableCell,
   TableRow,
@@ -370,7 +371,6 @@ export class DocxSerializerState<S extends Schema = any> {
       new Paragraph({
         text,
         style: 'aside',
-        // alignment: AlignmentType.CENTER,
       }),
     );
   }
