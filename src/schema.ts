@@ -1,6 +1,6 @@
-import { HeadingLevel, ShadingType } from 'docx';
+import { BorderStyle, HeadingLevel } from 'docx';
 import { DocxSerializer, MarkSerializer, NodeSerializer } from './serializer';
-import { getLatexFromNode, coverColorToHex } from './utils';
+import { coverColorToHex } from './utils';
 
 const colors = [
   {
@@ -56,13 +56,16 @@ export const defaultNodes: NodeSerializer = {
     state.closeBlock(node, { heading });
   },
   blockquote(state, node) {
-    // TODO: improve styling?
-    // state.renderContent(node);
-    state.renderContent(node, { style: 'Intense Quote' });
+    state.renderContent(node, {
+      style: 'Intense Quote',
+      // indent: { left: 250 },
+      border: { left: { style: BorderStyle.THICK_THIN_MEDIUM_GAP, size: 40, color: 'red' } },
+    });
   },
   code_block(state, node) {
     // TODO: something for code
     state.renderContent(node);
+    state.closeBlock(node);
   },
   horizontal_rule(state, node) {
     // Kinda hacky, but this works to insert two paragraphs, the first with a break
