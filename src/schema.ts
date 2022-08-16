@@ -57,7 +57,8 @@ export const defaultNodes: NodeSerializer = {
   },
   blockquote(state, node) {
     // TODO: improve styling?
-    state.renderContent(node);
+    // state.renderContent(node);
+    state.renderContent(node, { style: 'IntenseQuote' });
   },
   code_block(state, node) {
     // TODO: something for code

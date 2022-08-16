@@ -112,8 +112,11 @@ export class DocxSerializerState<S extends Schema = any> {
     this.footnoteIds = [];
   }
 
-  renderContent(parent: ProsemirrorNode<S>) {
-    parent.forEach((node, _, i) => this.render(node, parent, i));
+  renderContent(parent: ProsemirrorNode, opts?: IParagraphOptions) {
+    parent.forEach((node, _, i) => {
+      if (opts) this.addParagraphOptions(opts);
+      this.render(node, parent, i);
+    });
   }
 
   render(node: ProsemirrorNode<S>, parent: ProsemirrorNode<S>, index: number) {
