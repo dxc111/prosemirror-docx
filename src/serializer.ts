@@ -370,7 +370,7 @@ export class DocxSerializerState<S extends Schema = any> {
     this.children.push(
       new Paragraph({
         text,
-        style: 'aside',
+        style: 'Aside',
       }),
     );
   }
@@ -381,7 +381,7 @@ export class DocxSerializerState<S extends Schema = any> {
         this.children.push(
           new Paragraph({
             text,
-            style: 'code',
+            style: 'BlockCode',
           }),
         );
       });
@@ -495,6 +495,7 @@ export class DocxSerializerState<S extends Schema = any> {
   closeBlock(node: ProsemirrorNode<S>, props?: IParagraphOptions) {
     const paragraph = new Paragraph({
       children: this.current,
+      style: 'NormalPara',
       ...this.nextParentParagraphOpts,
       ...props,
     });

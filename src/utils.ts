@@ -10,6 +10,7 @@ import {
   BorderStyle,
 } from 'docx';
 import { Node as ProsemirrorNode } from 'prosemirror-model';
+import styles from './styles';
 
 export function createShortId() {
   return Math.random().toString(36).substr(2, 9);
@@ -63,58 +64,7 @@ export function createDocFromState(
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     footnotes, // @ts-ignore
     comments: { children: state.comments },
-    styles: {
-      paragraphStyles: [
-        {
-          id: 'aside',
-          name: 'Aside',
-          basedOn: 'Normal',
-          next: 'Normal',
-          run: {
-            color: '999999',
-            italics: true,
-            size: 18,
-          },
-          paragraph: {
-            spacing: {
-              line: 276,
-            },
-            alignment: AlignmentType.CENTER,
-          },
-        },
-        {
-          id: 'code',
-          name: 'Code',
-          basedOn: 'Normal',
-          next: 'Normal',
-          run: {
-            color: '6e7d8b',
-            italics: true,
-            size: 16,
-          },
-          paragraph: {
-            spacing: {
-              before: 30,
-              after: 30,
-              line: 276,
-            },
-            indent: { left: 250 },
-          },
-        },
-        {
-          id: 'IntenseQuote',
-          name: 'IntenseQuote',
-          basedOn: 'Normal',
-          next: 'Normal',
-          run: {
-            italics: true,
-          },
-          paragraph: {
-            indent: { left: 250 },
-          },
-        },
-      ],
-    },
+    styles,
     numbering: {
       config: state.numbering,
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment

@@ -53,7 +53,7 @@ export const defaultNodes: NodeSerializer = {
       HeadingLevel.HEADING_5,
       HeadingLevel.HEADING_6,
     ][node.attrs.level - 1];
-    state.closeBlock(node, { heading });
+    state.closeBlock(node, { heading, style: `heading${node.attrs.level}` });
   },
   blockquote(state, node) {
     state.renderContent(node, {
