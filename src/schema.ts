@@ -1,6 +1,7 @@
 import { BorderStyle, HeadingLevel } from 'docx';
 import { DocxSerializer, MarkSerializer, NodeSerializer } from './serializer';
 import { coverColorToHex } from './utils';
+import sizeTransfer from './sizeTransfer';
 
 const colors = [
   {
@@ -159,7 +160,7 @@ export const defaultMarks: MarkSerializer = {
   font_size(state, node, mark) {
     try {
       return {
-        size: parseInt(mark.attrs.fontSize || '', 10),
+        size: sizeTransfer(parseInt(mark.attrs.fontSize || '', 10)),
       };
     } catch (e) {
       return {};
