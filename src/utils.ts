@@ -103,7 +103,7 @@ export function coverColorToHex(color: string) {
 }
 
 function getHeaderAndFooter(pageOptions: any = {}, getImageBuffer: any) {
-  const section: any = {};
+  const section: any = { children: [] };
   if (pageOptions.margin) {
     section.properties = {
       page: {
