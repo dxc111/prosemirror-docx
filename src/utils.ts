@@ -108,8 +108,8 @@ function getHeaderAndFooter(pageOptions: any = {}, getImageBuffer: any) {
     section.properties = {
       page: {
         margin: {
-          header: convertMillimetersToTwip(pageOptions.margin.top * 10),
-          footer: convertMillimetersToTwip(pageOptions.margin.bottom * 10),
+          top: convertMillimetersToTwip(pageOptions.margin.top * 10),
+          bottom: convertMillimetersToTwip(pageOptions.margin.bottom * 10),
           left: convertMillimetersToTwip(pageOptions.margin.left * 10),
           right: convertMillimetersToTwip(pageOptions.margin.right * 10),
         },
@@ -136,9 +136,6 @@ function getHeaderAndFooter(pageOptions: any = {}, getImageBuffer: any) {
       default: new Header({
         children: [
           new Paragraph({
-            spacing: {
-              before: 100,
-            },
             children: [...(image ? [image] : []), new TextRun(pageOptions.header.text)],
             // eslint-disable-next-line @typescript-eslint/no-use-before-define
             alignment: getAlignment(pageOptions.header.position),
@@ -155,7 +152,7 @@ function getHeaderAndFooter(pageOptions: any = {}, getImageBuffer: any) {
           new Paragraph({
             children: [
               new TextRun({
-                children: ['Page ', PageNumber.CURRENT],
+                children: [PageNumber.CURRENT],
               }),
             ],
             // eslint-disable-next-line @typescript-eslint/no-use-before-define
