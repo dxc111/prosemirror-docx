@@ -109,7 +109,7 @@ function getHeaderAndFooter(pageOptions: any = {}, getImageBuffer: any) {
       page: {
         margin: {
           top: convertMillimetersToTwip(pageOptions.margin.top * 10),
-          header: convertMillimetersToTwip(pageOptions.margin.top * 10) - 20,
+          header: 50,
           bottom: convertMillimetersToTwip(pageOptions.margin.bottom * 10),
           left: convertMillimetersToTwip(pageOptions.margin.left * 10),
           right: convertMillimetersToTwip(pageOptions.margin.right * 10),
@@ -144,9 +144,9 @@ function getHeaderAndFooter(pageOptions: any = {}, getImageBuffer: any) {
             ],
             // eslint-disable-next-line @typescript-eslint/no-use-before-define
             alignment: getAlignment(pageOptions.header.position),
-            spacing: {
-              before: image ? 0 - convertMillimetersToTwip(18) : 0,
-            },
+            // spacing: {
+            //   before: image ? 0 - convertMillimetersToTwip(18) : 0,
+            // },
           }),
         ],
       }),
