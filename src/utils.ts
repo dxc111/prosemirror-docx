@@ -124,6 +124,7 @@ function getHeaderAndFooter(pageOptions: any = {}, getImageBuffer: any) {
 
       const aspect = rawH / rawW;
       const height = convertMillimetersToTwip(10);
+      console.log(height);
       image = new ImageRun({
         data: arrayBuffer,
         transformation: {
