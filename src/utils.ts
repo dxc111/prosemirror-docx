@@ -30,6 +30,7 @@ export function createDocFromState(
   pageOptions: any = null,
   getImageBuffer: any = async () => null,
 ) {
+  // eslint-disable-next-line @typescript-eslint/no-use-before-define
   const pageMargin = getPageMargin(pageOptions?.margin || null);
   // 对多栏的支持
   const sections = state.children.reduce((res: any[], cur: any) => {
@@ -53,7 +54,7 @@ export function createDocFromState(
 
   // eslint-disable-next-line @typescript-eslint/no-use-before-define
   const pageSection = getHeaderAndFooter(pageOptions, getImageBuffer);
-  pageSection.properties.page = pageMargin || {};
+  pageSection.properties = { page: pageMargin || {} };
   sections.unshift(pageSection);
 
   return new Document({
