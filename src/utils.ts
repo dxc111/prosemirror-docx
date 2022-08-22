@@ -30,6 +30,7 @@ export function createDocFromState(
   pageOptions: any = null,
   getImageBuffer: any = async () => null,
 ) {
+  const pageMargin = getPageMargin(pageOptions?.margin || null);
   // 对多栏的支持
   const sections = state.children.reduce((res: any[], cur: any) => {
     if (!cur.properties?.column) {
@@ -39,6 +40,7 @@ export function createDocFromState(
         res.push({
           properties: {
             type: SectionType.CONTINUOUS,
+            page: pageMargin || {},
           },
           children: [cur],
         });
@@ -51,7 +53,7 @@ export function createDocFromState(
 
   // eslint-disable-next-line @typescript-eslint/no-use-before-define
   const pageSection = getHeaderAndFooter(pageOptions, getImageBuffer);
-
+  pageSection.properties.page = pageMargin || {};
   sections.unshift(pageSection);
 
   return new Document({
@@ -102,22 +104,25 @@ export function coverColorToHex(color: string) {
   }
 }
 
-function getHeaderAndFooter(pageOptions: any = {}, getImageBuffer: any) {
-  const section: any = { children: [] };
-  if (pageOptions.margin) {
-    section.properties = {
-      type: SectionType.CONTINUOUS,
+function getPageMargin(margin: any) {
+  if (margin) {
+    return {
       page: {
         margin: {
-          top: convertMillimetersToTwip(pageOptions.margin.top * 10),
+          top: convertMillimetersToTwip(margin.top * 10),
           header: 50,
-          bottom: convertMillimetersToTwip(pageOptions.margin.bottom * 10),
-          left: convertMillimetersToTwip(pageOptions.margin.left * 10),
-          right: convertMillimetersToTwip(pageOptions.margin.right * 10),
+          bottom: convertMillimetersToTwip(margin.bottom * 10),
+          left: convertMillimetersToTwip(margin.left * 10),
+          right: convertMillimetersToTwip(margin.right * 10),
         },
       },
     };
   }
+  return null;
+}
+
+function getHeaderAndFooter(pageOptions: any = {}, getImageBuffer: any) {
+  const section: any = { children: [] };
 
   if (pageOptions.header && pageOptions.header.isActive) {
     let image = null;
