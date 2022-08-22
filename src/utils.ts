@@ -137,7 +137,10 @@ function getHeaderAndFooter(pageOptions: any = {}, getImageBuffer: any) {
       default: new Header({
         children: [
           new Paragraph({
-            children: [...(image ? [image] : []), new TextRun(pageOptions.header.text)],
+            children: [
+              ...(image ? [image, new TextRun('  ')] : []),
+              new TextRun(pageOptions.header.text),
+            ],
             // eslint-disable-next-line @typescript-eslint/no-use-before-define
             alignment: getAlignment(pageOptions.header.position),
           }),
