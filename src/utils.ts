@@ -136,6 +136,9 @@ function getHeaderAndFooter(pageOptions: any = {}, getImageBuffer: any) {
       default: new Header({
         children: [
           new Paragraph({
+            spacing: {
+              before: 100,
+            },
             children: [...(image ? [image] : []), new TextRun(pageOptions.header.text)],
             // eslint-disable-next-line @typescript-eslint/no-use-before-define
             alignment: getAlignment(pageOptions.header.position),
