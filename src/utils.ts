@@ -109,6 +109,7 @@ function getHeaderAndFooter(pageOptions: any = {}, getImageBuffer: any) {
       page: {
         margin: {
           top: convertMillimetersToTwip(pageOptions.margin.top * 10),
+          header: convertMillimetersToTwip(pageOptions.margin.top * 10) - 20,
           bottom: convertMillimetersToTwip(pageOptions.margin.bottom * 10),
           left: convertMillimetersToTwip(pageOptions.margin.left * 10),
           right: convertMillimetersToTwip(pageOptions.margin.right * 10),
