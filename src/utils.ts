@@ -108,14 +108,12 @@ export function coverColorToHex(color: string) {
 function getPageMargin(margin: any) {
   if (margin) {
     return {
-      page: {
-        margin: {
-          top: convertMillimetersToTwip(margin.top * 10),
-          header: 50,
-          bottom: convertMillimetersToTwip(margin.bottom * 10),
-          left: convertMillimetersToTwip(margin.left * 10),
-          right: convertMillimetersToTwip(margin.right * 10),
-        },
+      margin: {
+        top: convertMillimetersToTwip(margin.top * 10),
+        header: 50,
+        bottom: convertMillimetersToTwip(margin.bottom * 10),
+        left: convertMillimetersToTwip(margin.left * 10),
+        right: convertMillimetersToTwip(margin.right * 10),
       },
     };
   }
