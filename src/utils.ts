@@ -41,24 +41,9 @@ export function createDocFromState(
             type: SectionType.CONTINUOUS,
           },
           children: [cur],
-          footers: footerText
-            ? {
-                default: new Footer({
-                  children: [new Paragraph({ text: footerText, alignment: AlignmentType.CENTER })],
-                }),
-              }
-            : undefined,
         });
       }
     } else {
-      // eslint-disable-next-line no-param-reassign
-      cur.footers = footerText
-        ? {
-            default: new Footer({
-              children: [new Paragraph({ text: footerText, alignment: AlignmentType.CENTER })],
-            }),
-          }
-        : undefined;
       res.push(cur);
     }
     return res;
@@ -147,7 +132,7 @@ async function getHeaderAndFooter(pageOptions: any = {}, getImageBuffer: any) {
         },
       });
     }
-    section.header = {
+    section.headers = {
       default: new Header({
         children: [
           new Paragraph({
@@ -161,7 +146,7 @@ async function getHeaderAndFooter(pageOptions: any = {}, getImageBuffer: any) {
   }
 
   if (pageOptions.footer && pageOptions.footer.isActive) {
-    section.footer = {
+    section.footers = {
       default: new Footer({
         children: [
           new Paragraph({
@@ -174,7 +159,7 @@ async function getHeaderAndFooter(pageOptions: any = {}, getImageBuffer: any) {
     };
   }
 
-  return [section];
+  return section;
 }
 
 function getAlignment(alignment = '') {
