@@ -520,6 +520,7 @@ export class DocxSerializer<S extends Schema = any> {
     options: Options,
     footerText = '',
     footnotes: string[] = [],
+    pageOptions: any,
   ) {
     const state = new DocxSerializerState<S>(this.nodes, this.marks, options);
     state.renderContent(content);
@@ -528,6 +529,6 @@ export class DocxSerializer<S extends Schema = any> {
       return acc;
     }, {});
 
-    return createDocFromState(state, footerText, f);
+    return createDocFromState(state, footerText, f, pageOptions, options.getImageBuffer);
   }
 }
