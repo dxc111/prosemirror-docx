@@ -102,7 +102,7 @@ export function coverColorToHex(color: string) {
   }
 }
 
-async function getHeaderAndFooter(pageOptions: any = {}, getImageBuffer: any) {
+function getHeaderAndFooter(pageOptions: any = {}, getImageBuffer: any) {
   const section: any = {};
   if (pageOptions.margin) {
     section.properties = {
