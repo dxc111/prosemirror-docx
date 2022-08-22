@@ -144,6 +144,9 @@ function getHeaderAndFooter(pageOptions: any = {}, getImageBuffer: any) {
             ],
             // eslint-disable-next-line @typescript-eslint/no-use-before-define
             alignment: getAlignment(pageOptions.header.position),
+            spacing: {
+              before: image ? 0 - convertMillimetersToTwip(18) : 0,
+            },
           }),
         ],
       }),
