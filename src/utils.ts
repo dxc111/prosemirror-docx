@@ -150,7 +150,11 @@ function getHeaderAndFooter(pageOptions: any = {}, getImageBuffer: any) {
       default: new Footer({
         children: [
           new Paragraph({
-            text: PageNumber.CURRENT,
+            children: [
+              new TextRun({
+                children: ['Page ', PageNumber.CURRENT],
+              }),
+            ],
             // eslint-disable-next-line @typescript-eslint/no-use-before-define
             alignment: getAlignment(pageOptions.footer.position),
           }),
