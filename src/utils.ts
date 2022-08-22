@@ -106,6 +106,7 @@ function getHeaderAndFooter(pageOptions: any = {}, getImageBuffer: any) {
   const section: any = { children: [] };
   if (pageOptions.margin) {
     section.properties = {
+      type: SectionType.CONTINUOUS,
       page: {
         margin: {
           top: convertMillimetersToTwip(pageOptions.margin.top * 10),
