@@ -133,6 +133,10 @@ export const defaultNodes: NodeSerializer = {
       if (isFullCite) {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
+        console.log(window.LatEditorIns);
+
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
         if (window.LatEditorIns) {
           // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           // @ts-ignore
