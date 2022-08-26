@@ -103,7 +103,14 @@ export class DocxSerializerState<S extends Schema = any> {
 
   private maxImageWidth = 600;
 
-  constructor(nodes: NodeSerializer<S>, marks: MarkSerializer<S>, options: Options) {
+  public fullCiteContents: Record<string, string>;
+
+  constructor(
+    nodes: NodeSerializer<S>,
+    marks: MarkSerializer<S>,
+    options: Options,
+    fullCiteContents: Record<string, string>,
+  ) {
     this.nodes = nodes;
     this.marks = marks;
     this.options = options ?? {};
@@ -111,6 +118,7 @@ export class DocxSerializerState<S extends Schema = any> {
     this.numbering = [];
     this.footnoteIdx = 0;
     this.footnoteIds = [];
+    this.fullCiteContents = fullCiteContents;
   }
 
   renderContent(parent: ProsemirrorNode, opts?: IParagraphOptions) {
@@ -521,8 +529,9 @@ export class DocxSerializer<S extends Schema = any> {
     footerText = '',
     footnotes: string[] = [],
     pageOptions: any,
+    fullCiteContents: Record<string, string>,
   ) {
-    const state = new DocxSerializerState<S>(this.nodes, this.marks, options);
+    const state = new DocxSerializerState<S>(this.nodes, this.marks, options, fullCiteContents);
     state.renderContent(content);
     const f: Record<number, any> = footnotes.reduce((acc: Record<number, any>, cur, idx) => {
       acc[idx + 1] = { children: [new Paragraph({ children: [new TextRun(cur)] })] };

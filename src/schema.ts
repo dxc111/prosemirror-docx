@@ -131,26 +131,9 @@ export const defaultNodes: NodeSerializer = {
     try {
       const { citeId, isFullCite } = node.attrs;
       if (isFullCite) {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        console.log(window.LatEditorIns);
-
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        if (window.LatEditorIns) {
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore
-          const obj = window.LatEditorIns.findTargetCiteObject(citeId);
-          if (obj) {
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            const text = window.LatEditorIns.getTextContent(obj.content);
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            console.log(window.LatEditorIns, text);
-            state.text((text || '').replace(/\u200b/g, ''));
-          }
-        }
+        const text = state.fullCiteContents[citeId] || '';
+        console.log(text);
+        state.text((text || '').replace(/\u200b/g, ''));
       } else {
         state.renderInline(node);
       }
