@@ -128,24 +128,30 @@ export const defaultNodes: NodeSerializer = {
     state.columns(node);
   },
   inlineCitation(state, node) {
-    const { citeId, isFullCite } = node.attrs;
-    if (isFullCite) {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      if (window.LatEditorIns) {
+    try {
+      const { citeId, isFullCite } = node.attrs;
+      if (isFullCite) {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        const obj = window.LatEditorIns.findTargetCiteObject(citeId);
-        if (obj) {
+        if (window.LatEditorIns) {
           // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           // @ts-ignore
-          const text = window.LatEditorIns.getTextContent(obj.content);
-
-          state.text((text || '').replace(/\u200b/g, ''));
+          const obj = window.LatEditorIns.findTargetCiteObject(citeId);
+          if (obj) {
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            const text = window.LatEditorIns.getTextContent(obj.content);
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            console.log(window.LatEditorIns, text);
+            state.text((text || '').replace(/\u200b/g, ''));
+          }
         }
+      } else {
+        state.renderInline(node);
       }
-    } else {
-      state.renderInline(node);
+    } catch (e) {
+      console.log('eport cite error: ', e);
     }
   },
   default(state, node) {
