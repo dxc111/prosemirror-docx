@@ -127,6 +127,27 @@ export const defaultNodes: NodeSerializer = {
   columns(state, node) {
     state.columns(node);
   },
+  inlineCitation(state, node) {
+    const { citeId, isFullCite } = node.attrs;
+    if (isFullCite) {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      if (window.LatEditorIns) {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        const obj = window.LatEditorIns.findTargetCiteObject(citeId);
+        if (obj) {
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+          // @ts-ignore
+          const text = window.LatEditorIns.getTextContent(obj.content);
+
+          state.text((text || '').replace(/\u200b/g, ''));
+        }
+      }
+    } else {
+      state.renderInline(node);
+    }
+  },
   default(state, node) {
     if (node.isAtom || node.isLeaf) return;
 
