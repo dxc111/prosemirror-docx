@@ -56,6 +56,18 @@ export const defaultNodes: NodeSerializer = {
     ][node.attrs.level - 1];
     state.closeBlock(node, { heading, style: `heading${node.attrs.level}` });
   },
+  hierarchy_title(state, node) {
+    state.renderInline(node);
+    const heading = [
+      HeadingLevel.HEADING_1,
+      HeadingLevel.HEADING_2,
+      HeadingLevel.HEADING_3,
+      HeadingLevel.HEADING_4,
+      HeadingLevel.HEADING_5,
+      HeadingLevel.HEADING_6,
+    ][node.attrs.level - 1];
+    state.closeBlock(node, { heading, style: `heading${node.attrs.level}` });
+  },
   blockquote(state, node) {
     state.renderContent(node, {
       style: 'IntenseQuote',
