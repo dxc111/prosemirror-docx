@@ -12,6 +12,7 @@ import {
   Paragraph,
   SectionType,
   TextRun,
+  VerticalAlign,
 } from 'docx';
 import { Node as ProsemirrorNode } from 'prosemirror-model';
 import styles from './styles';
@@ -54,7 +55,7 @@ export function createDocFromState(
 
   // eslint-disable-next-line @typescript-eslint/no-use-before-define
   const pageSection = getHeaderAndFooter(pageOptions, getImageBuffer);
-  pageSection.properties = { page: pageMargin || {} };
+  pageSection.properties = { page: pageMargin || {}, verticalAlign: VerticalAlign.CENTER };
   sections.unshift(pageSection);
 
   return new Document({
@@ -147,6 +148,7 @@ function getHeaderAndFooter(pageOptions: any = {}, getImageBuffer: any) {
               ...(image ? [image, new TextRun('  ')] : []),
               new TextRun(pageOptions.header.text),
             ],
+            style: 'Header2',
             // eslint-disable-next-line @typescript-eslint/no-use-before-define
             alignment: getAlignment(pageOptions.header.position),
             // spacing: {

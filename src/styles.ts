@@ -64,6 +64,16 @@ export default {
       },
     },
     {
+      id: 'Header2',
+      name: 'Header2',
+      basedOn: 'Normal',
+      next: 'Normal',
+      run: {
+        size: 18,
+        color: '58617A',
+      },
+    },
+    {
       id: 'Aside',
       name: 'Aside',
       basedOn: 'Normal',
