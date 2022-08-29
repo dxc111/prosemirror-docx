@@ -5,40 +5,47 @@ export default {
     heading1: {
       run: {
         font: 'Calibri',
-        size: 52,
+        size: 56,
         bold: true,
         color: '2E3A59',
-      },
-      paragraph: {
-        spacing: { line: 340 },
       },
     },
     heading2: {
       run: {
         font: 'Calibri',
-        size: 26,
+        size: 48,
         bold: true,
         color: '2E3A59',
-      },
-      paragraph: {
-        spacing: { line: 340 },
       },
     },
     heading3: {
       run: {
         font: 'Calibri',
-        size: 26,
+        size: 40,
         bold: true,
         color: '2E3A59',
-      },
-      paragraph: {
-        spacing: { line: 276 },
       },
     },
     heading4: {
       run: {
         font: 'Calibri',
-        size: 26,
+        size: 32,
+        bold: true,
+        color: '2E3A59',
+      },
+    },
+    heading5: {
+      run: {
+        font: 'Calibri',
+        size: 30,
+        bold: true,
+        color: '2E3A59',
+      },
+    },
+    heading6: {
+      run: {
+        font: 'Calibri',
+        size: 28,
         bold: true,
         color: '2E3A59',
       },

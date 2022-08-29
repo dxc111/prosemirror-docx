@@ -129,7 +129,7 @@ function getHeaderAndFooter(pageOptions: any = {}, getImageBuffer: any) {
       const { arrayBuffer, width: rawW, height: rawH } = getImageBuffer(pageOptions.header.image);
 
       const aspect = rawH / rawW;
-      const height = 50;
+      const height = 30;
 
       image = new ImageRun({
         data: arrayBuffer,
