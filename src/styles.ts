@@ -72,6 +72,11 @@ export default {
         size: 18,
         color: '58617A',
       },
+      paragraph: {
+        spacing: {
+          before: 10,
+        },
+      },
     },
     {
       id: 'Aside',

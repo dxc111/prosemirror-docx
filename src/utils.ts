@@ -55,7 +55,7 @@ export function createDocFromState(
 
   // eslint-disable-next-line @typescript-eslint/no-use-before-define
   const pageSection = getHeaderAndFooter(pageOptions, getImageBuffer);
-  pageSection.properties = { page: pageMargin || {}, verticalAlign: VerticalAlign.CENTER };
+  pageSection.properties = { page: pageMargin || {} };
   sections.unshift(pageSection);
 
   return new Document({
@@ -151,9 +151,6 @@ function getHeaderAndFooter(pageOptions: any = {}, getImageBuffer: any) {
             style: 'Header2',
             // eslint-disable-next-line @typescript-eslint/no-use-before-define
             alignment: getAlignment(pageOptions.header.position),
-            // spacing: {
-            //   before: image ? 0 - convertMillimetersToTwip(18) : 0,
-            // },
           }),
         ],
       }),
