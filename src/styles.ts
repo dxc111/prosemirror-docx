@@ -79,6 +79,16 @@ export default {
       },
     },
     {
+      id: 'Footer2',
+      name: 'Footer2',
+      basedOn: 'Normal',
+      next: 'Normal',
+      run: {
+        size: 18,
+        color: '58617A',
+      },
+    },
+    {
       id: 'Aside',
       name: 'Aside',
       basedOn: 'Normal',

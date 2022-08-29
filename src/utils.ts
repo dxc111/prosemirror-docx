@@ -167,6 +167,7 @@ function getHeaderAndFooter(pageOptions: any = {}, getImageBuffer: any) {
                 children: [PageNumber.CURRENT],
               }),
             ],
+            style: 'Footer2',
             // eslint-disable-next-line @typescript-eslint/no-use-before-define
             alignment: getAlignment(pageOptions.footer.position),
           }),
