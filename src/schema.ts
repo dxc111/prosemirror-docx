@@ -143,9 +143,25 @@ export const defaultNodes: NodeSerializer = {
     try {
       const { citeId, isFullCite } = node.attrs;
       if (isFullCite) {
-        const text = state.fullCiteContents[citeId] || '';
-        console.log(text);
-        state.text((text || '').replace(/\u200b/g, ''));
+        const text = (state.fullCiteContents[citeId] || '').replace(/\u200b/g, '');
+
+        const images = [...text.matchAll(/LAT_IMAGE\(([^()]+)\)/g)];
+        if (!images.length) {
+          state.text(text || '');
+        } else {
+          let midText = text;
+          for (let i = 0; i < images.length; i++) {
+            const image = images[i];
+            const [match, src] = image;
+            const index = midText.indexOf(match);
+            const before = midText.slice(0, index);
+            const after = midText.slice(index + match.length);
+            state.text(before);
+            state.image(src);
+            midText = after;
+          }
+          state.text(midText);
+        }
       } else {
         state.renderInline(node);
       }
