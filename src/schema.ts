@@ -144,7 +144,11 @@ export const defaultNodes: NodeSerializer = {
       const { citeId, isFullCite } = node.attrs;
       if (isFullCite) {
         const text = (state.fullCiteContents[citeId] || '').replace(/\u200b/g, '');
-        state.text(text || '');
+        text.split('\n').forEach((line, index) => {
+          if (index !== 0) state.addRunOptions({ break: 1 });
+          state.text(line);
+        });
+        // state.text(text || '');
         // const images = [...text.matchAll(/LAT_IMAGE\(([^()]+)\)/g)];
         // if (!images.length) {
         //   state.text(text || '');
