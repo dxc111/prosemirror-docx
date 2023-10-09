@@ -1,7 +1,15 @@
-import { BorderStyle, HeadingLevel } from 'docx';
+import { BorderStyle, HeadingLevel, UnderlineType } from 'docx';
 import { DocxSerializer, MarkSerializer, NodeSerializer } from './serializer';
 import { coverColorToHex } from './utils';
 import sizeTransfer from './sizeTransfer';
+
+const LINE_TYPE: Record<string, UnderlineType> = {
+  solid: UnderlineType.SINGLE,
+  double: UnderlineType.DOUBLE,
+  dotted: UnderlineType.DOTTED,
+  dashed: UnderlineType.DASH,
+  wavy: UnderlineType.WAVE,
+};
 
 const colors = [
   {
@@ -187,9 +195,7 @@ export const defaultMarks: MarkSerializer = {
   },
   font_family(state, node, mark) {
     return {
-      font: {
-        name: mark.attrs.font_family || 'Kaiti SC',
-      },
+      font: mark.attrs.font_family || 'sans-serif',
     };
   },
   font_size(state, node, mark) {
@@ -224,9 +230,13 @@ export const defaultMarks: MarkSerializer = {
     // doubleStrike!
     return { strike: true };
   },
-  underline() {
+  underline(_, __, mark) {
+    const lineType = mark.attrs.lineType || 'solid';
+
     return {
-      underline: {},
+      underline: {
+        type: LINE_TYPE[lineType] || UnderlineType.SINGLE,
+      },
     };
   },
   smallcaps() {
