@@ -57,16 +57,7 @@ export const defaultNodes: NodeSerializer = {
     state.closeBlock(node, { heading, style: `heading${node.attrs.level}` });
   },
   hierarchy_title(state, node) {
-    state.renderInline(node);
-    const heading = [
-      HeadingLevel.HEADING_1,
-      HeadingLevel.HEADING_2,
-      HeadingLevel.HEADING_3,
-      HeadingLevel.HEADING_4,
-      HeadingLevel.HEADING_5,
-      HeadingLevel.HEADING_6,
-    ][node.attrs.level - 1];
-    state.closeBlock(node, { heading, style: `heading${node.attrs.level}` });
+    state.hierarchy_title(node);
   },
   blockquote(state, node) {
     state.renderContent(node, {
@@ -86,9 +77,7 @@ export const defaultNodes: NodeSerializer = {
     state.addCodeBlock(node);
   },
   horizontal_rule(state, node) {
-    // Kinda hacky, but this works to insert two paragraphs, the first with a break
-    state.closeBlock(node, { thematicBreak: true });
-    state.closeBlock(node);
+    state.horizontal_rule(node);
   },
   hard_break(state) {
     state.addRunOptions({ break: 1 });
@@ -193,7 +182,7 @@ export const defaultMarks: MarkSerializer = {
   },
   color(state, node, mark) {
     return {
-      color: mark.attrs.color ? coverColorToHex(mark.attrs.color) : '#000000',
+      color: mark.attrs.color ? coverColorToHex(mark.attrs.color) : '000000',
     };
   },
   font_family(state, node, mark) {
@@ -229,7 +218,7 @@ export const defaultMarks: MarkSerializer = {
     return { subScript: true };
   },
   sup() {
-    return { subScript: true };
+    return { superScript: true };
   },
   strike() {
     // doubleStrike!

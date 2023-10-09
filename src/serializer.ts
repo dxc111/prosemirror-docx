@@ -9,6 +9,7 @@ import {
   CommentReference,
   ExternalHyperlink,
   FootnoteReferenceRun,
+  HeadingLevel,
   ICommentOptions,
   ImageRun,
   IParagraphOptions,
@@ -20,7 +21,6 @@ import {
   ParagraphChild,
   SectionType,
   SequentialIdentifier,
-  ShadingType,
   Table,
   TableCell,
   TableRow,
@@ -92,6 +92,8 @@ export class DocxSerializerState<S extends Schema = any> {
 
   comments: ICommentOptions[] = [];
 
+  pageBreak = 'hr';
+
   // Optionally add options
   nextParentParagraphOpts?: IParagraphOptions;
 
@@ -110,6 +112,7 @@ export class DocxSerializerState<S extends Schema = any> {
     marks: MarkSerializer<S>,
     options: Options,
     fullCiteContents: Record<string, string>,
+    pageBreak = 'hr',
   ) {
     this.nodes = nodes;
     this.marks = marks;
@@ -119,6 +122,7 @@ export class DocxSerializerState<S extends Schema = any> {
     this.footnoteIdx = 0;
     this.footnoteIds = [];
     this.fullCiteContents = fullCiteContents;
+    this.pageBreak = pageBreak;
   }
 
   renderContent(parent: ProsemirrorNode, opts?: IParagraphOptions) {
@@ -169,7 +173,15 @@ export class DocxSerializerState<S extends Schema = any> {
     if (node.type.name === 'comment') {
       this.comments.push({
         id: this.curIdx,
-        text: node.attrs.comment,
+        children: [
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: node.attrs.comment,
+              }),
+            ],
+          }),
+        ],
         date: new Date(node.attrs.createDate),
       });
       this.current.push(new CommentRangeStart(this.curIdx));
@@ -198,6 +210,34 @@ export class DocxSerializerState<S extends Schema = any> {
   openTable() {}
 
   closeTable() {}
+
+  hierarchy_title(node: ProsemirrorNode<S>) {
+    if (this.pageBreak === 'page') {
+      this.addParagraphOptions({ pageBreakBefore: true });
+    }
+    if (node.content.size > 0) {
+      this.renderInline(node);
+      const heading = [
+        HeadingLevel.HEADING_1,
+        HeadingLevel.HEADING_2,
+        HeadingLevel.HEADING_3,
+        HeadingLevel.HEADING_4,
+        HeadingLevel.HEADING_5,
+        HeadingLevel.HEADING_6,
+      ][node.attrs.level - 1];
+      this.closeBlock(node, { heading, style: `heading${node.attrs.level}` });
+    }
+  }
+
+  horizontal_rule(node: ProsemirrorNode<S>) {
+    if (this.pageBreak === 'hr') {
+      this.closeBlock(node, { pageBreakBefore: true });
+    } else {
+      // Kinda hacky, but this works to insert two paragraphs, the first with a break
+      this.closeBlock(node, { thematicBreak: true });
+      this.closeBlock(node);
+    }
+  }
 
   renderInline(parent: ProsemirrorNode<S>) {
     // Pop the stack over to this object when we encounter a link, and closeLink restores it
@@ -531,7 +571,13 @@ export class DocxSerializer<S extends Schema = any> {
     pageOptions: any,
     fullCiteContents: Record<string, string>,
   ) {
-    const state = new DocxSerializerState<S>(this.nodes, this.marks, options, fullCiteContents);
+    const state = new DocxSerializerState<S>(
+      this.nodes,
+      this.marks,
+      options,
+      fullCiteContents,
+      pageOptions?.splitPage || 'hr',
+    );
     state.renderContent(content);
     const f: Record<number, any> = footnotes.reduce((acc: Record<number, any>, cur, idx) => {
       acc[idx + 1] = { children: [new Paragraph({ children: [new TextRun(cur)] })] };
