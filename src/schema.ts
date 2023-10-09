@@ -195,7 +195,7 @@ export const defaultMarks: MarkSerializer = {
   },
   font_family(state, node, mark) {
     return {
-      font: mark.attrs.font_family || 'sans-serif',
+      font: mark.attrs.fontFamily || 'sans-serif',
     };
   },
   font_size(state, node, mark) {
