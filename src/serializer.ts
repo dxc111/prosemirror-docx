@@ -212,7 +212,7 @@ export class DocxSerializerState<S extends Schema = any> {
   closeTable() {}
 
   hierarchy_title(node: ProsemirrorNode<S>) {
-    if (this.pageBreak === 'page') {
+    if (this.pageBreak === 'page' && this.children.length > 0) {
       this.addParagraphOptions({ pageBreakBefore: true });
     }
     if (node.content.size > 0) {
