@@ -20,17 +20,18 @@ function basicIndentStyle(indent: number): Pick<ILevelsOptions, 'style' | 'align
 }
 
 const numbered = Array(3)
-  .fill([LevelFormat.DECIMAL, LevelFormat.LOWER_LETTER, LevelFormat.LOWER_ROMAN])
+  .fill([LevelFormat.DECIMAL, LevelFormat.DECIMAL, LevelFormat.DECIMAL])
   .flat()
   .map((format, level) => ({
     level,
     format,
-    text: `%${level + 1}.`,
+    text: `${level > 0 ? `%${level}.` : ''}%${level + 1}.`,
     ...basicIndentStyle((level + 1) / 2),
   }));
 
 const bullets = Array(3)
-  .fill(['●', '○', '■'])
+  // .fill(['●', '○', '■'])
+  .fill(['●', '●', '●'])
   .flat()
   .map((text, level) => ({
     level,
