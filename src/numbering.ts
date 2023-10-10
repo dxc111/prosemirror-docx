@@ -25,7 +25,7 @@ const numbered = Array(3)
   .map((format, level) => ({
     level,
     format,
-    text: `${level > 0 ? `%${level}.` : ''}%${level + 1}.`,
+    text: `${new Array(level + 1).fill(1).reduce((res, _, idx) => `${res}%${idx + 1}.`, '')}`,
     ...basicIndentStyle((level + 1) / 2),
   }));
 
