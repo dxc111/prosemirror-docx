@@ -425,14 +425,27 @@ export class DocxSerializerState<S extends Schema = any> {
 
   addCodeBlock(node: ProsemirrorNode) {
     if (node.textContent) {
-      node.textContent.split('\n').forEach((text) => {
-        this.children.push(
-          new Paragraph({
-            text,
-            style: 'BlockCode',
-          }),
-        );
-      });
+      this.children.push(new Paragraph({ text: '' }));
+      // node.textContent.split('\n').forEach((text) => {
+      //   this.children.push(
+      //     new Paragraph({
+      //       text,
+      //       style: 'BlockCode',
+      //     }),
+      //   );
+      // });
+      this.children.push(
+        new Paragraph({
+          children: node.textContent
+            .split('\n')
+            .map(
+              (text, idx, arr) =>
+                new TextRun({ text, break: idx > 0 && idx !== arr.length - 1 ? 1 : undefined }),
+            ),
+          style: 'BlockCode',
+        }),
+      );
+      this.children.push(new Paragraph({ text: '' }));
     }
   }
 

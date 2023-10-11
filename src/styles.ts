@@ -106,6 +106,63 @@ export default {
       },
     },
     {
+      id: 'BlockCode',
+      name: 'BlockCode',
+      basedOn: 'Normal',
+      quickFormat: true,
+      run: {
+        font: 'Menlo',
+        color: '282828',
+        size: 18,
+      },
+      paragraph: {
+        alignment: AlignmentType.LEFT,
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        border: {
+          left: {
+            color: 'E6E6E6',
+            space: 1,
+            style: 'single',
+            size: 6,
+          },
+          right: {
+            color: 'E6E6E6',
+            space: 1,
+            style: 'single',
+            size: 6,
+          },
+          top: {
+            color: 'E6E6E6',
+            space: 1,
+            style: 'single',
+            size: 6,
+          },
+          bottom: {
+            color: 'E6E6E6',
+            space: 1,
+            style: 'single',
+            size: 6,
+          },
+        },
+        spacing: {
+          before: 276,
+          after: 276,
+          line: 276,
+        },
+        indent: {
+          left: 240,
+          right: 240,
+        },
+        // @ts-ignore
+        shading: {
+          fill: 'FCFCFC',
+          color: 'auto',
+          val: 'clear',
+        },
+      },
+    },
+    {
       id: 'IntenseQuote',
       name: 'Intense Quote',
       basedOn: 'Normal',
