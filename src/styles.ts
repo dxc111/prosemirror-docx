@@ -106,25 +106,6 @@ export default {
       },
     },
     {
-      id: 'BlockCode',
-      name: 'Block Code',
-      basedOn: 'Normal',
-      next: 'Normal',
-      run: {
-        color: '6e7d8b',
-        italics: true,
-        size: 18,
-      },
-      paragraph: {
-        spacing: {
-          before: 30,
-          after: 30,
-          line: 276,
-        },
-        indent: { left: 250 },
-      },
-    },
-    {
       id: 'IntenseQuote',
       name: 'Intense Quote',
       basedOn: 'Normal',

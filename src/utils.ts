@@ -69,6 +69,32 @@ export function createDocFromState(
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     }, // @ts-ignore
     sections,
+    externalStyles: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+    <w:styles xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"
+        xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"
+        xmlns:w14="http://schemas.microsoft.com/office/word/2010/wordml"
+        xmlns:w15="http://schemas.microsoft.com/office/word/2012/wordml" mc:Ignorable="w14 w15">
+        <w:style w:type="paragraph" w:customStyle="1" w:styleId="BlockCode">
+            <w:name w:val="BlockCode" />
+            <w:basedOn w:val="Normal" />
+            <w:qFormat />
+            <w:rsid w:val="00BE7EA6" />
+            <w:pPr>
+                <w:widowControl w:val="0" />
+                <w:shd w:val="clear" w:color="auto" w:fill="EDEDED" w:themeFill="accent3"
+                    w:themeFillTint="33" />
+                <w:spacing w:before="240" w:after="240" />
+                <w:ind w:leftChars="100" w:rightChars="100" />
+            </w:pPr>
+            <w:rPr>
+                <w:rFonts w:ascii="Menlo" w:eastAsia="Menlo" w:hAnsi="Menlo" />
+                <w:color w:val="7B7B7B" w:themeColor="accent3" w:themeShade="BF" />
+                <w:sz w:val="18" />
+            </w:rPr>
+        </w:style>
+    </w:styles>
+    `,
   });
 }
 
