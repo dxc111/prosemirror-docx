@@ -482,7 +482,7 @@ export class DocxSerializerState<S extends Schema = any> {
       colCount = rowContent.childCount;
       rowContent.forEach((cell: ProsemirrorNode<S>) => {
         this.children = [];
-        this.renderContent(cell);
+        this.renderContent(cell, { style: 'TableCell' });
         const tableCellOpts: Mutable<ITableCellOptions> = {
           children: this.children,
           width: {
