@@ -556,18 +556,12 @@ export class DocxSerializerState<S extends Schema = any> {
   }
 
   closeBlock(node: ProsemirrorNode<S>, props?: IParagraphOptions) {
-    const extra: any = {};
-    if (this.nextParentParagraphOpts && !this.nextParentParagraphOpts.style) {
-      extra.style = 'NormalPara';
-    }
-
     const paragraph = new Paragraph({
       children: this.current,
+      style: 'NormalPara',
       ...this.nextParentParagraphOpts,
-      ...extra,
       ...props,
     });
-
     this.current = [];
     delete this.nextParentParagraphOpts;
     this.children.push(paragraph);

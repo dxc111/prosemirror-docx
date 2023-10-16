@@ -71,7 +71,7 @@ export const defaultNodes: NodeSerializer = {
     state.renderContent(node, {
       style: 'IntenseQuote',
       // indent: { left: 250 },
-      border: { left: { style: BorderStyle.THICK, size: 20, color: 'efeff3', space: 40 } },
+      // border: { left: { style: BorderStyle.THICK, size: 20, color: 'efeff3', space: 40 } },
       // indent: { left: 250 },
       // border: { left: { style: BorderStyle.THICK_THIN_MEDIUM_GAP, size: 40 } },
     });
