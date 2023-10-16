@@ -30,8 +30,8 @@ const numbered = Array(3)
   }));
 
 const bullets = Array(3)
-  // .fill(['●', '○', '■'])
-  .fill(['●', '●', '●'])
+  .fill(['●', '○', '■'])
+  // .fill(['●', '●', '●'])
   .flat()
   .map((text, level) => ({
     level,
