@@ -308,14 +308,9 @@ export class DocxSerializerState<S extends Schema = any> {
       const { reference, level } = this.currentNumbering;
       this.currentNumbering = { reference, level: level + 1 };
     }
-    this.renderContent(
-      node,
-      style === 'numbered'
-        ? {
-            style: `${style}list`,
-          }
-        : undefined,
-    );
+    this.renderContent(node, {
+      style: `${style}list`,
+    });
     if (this.currentNumbering.level === 0) {
       delete this.currentNumbering;
     } else {
