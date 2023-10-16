@@ -583,6 +583,7 @@ export class DocxSerializer<S extends Schema = any> {
     footnotes: string[] = [],
     pageOptions: any,
     fullCiteContents: Record<string, string>,
+    externalStyles: any = null,
   ) {
     const state = new DocxSerializerState<S>(
       this.nodes,
@@ -597,6 +598,13 @@ export class DocxSerializer<S extends Schema = any> {
       return acc;
     }, {});
 
-    return createDocFromState(state, footerText, f, pageOptions, options.getImageBuffer);
+    return createDocFromState(
+      state,
+      footerText,
+      f,
+      pageOptions,
+      options.getImageBuffer,
+      externalStyles,
+    );
   }
 }

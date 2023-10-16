@@ -30,6 +30,7 @@ export function createDocFromState(
   footnotes: Record<number, any> = {},
   pageOptions: any = null,
   getImageBuffer: any = async () => null,
+  externalStyles: any = null,
 ) {
   // eslint-disable-next-line @typescript-eslint/no-use-before-define
   const pageMargin = getPageMargin(pageOptions?.margin || null);
@@ -63,7 +64,7 @@ export function createDocFromState(
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     footnotes, // @ts-ignore
     comments: { children: state.comments },
-    styles,
+    styles: externalStyles || styles,
     numbering: {
       config: state.numbering,
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
