@@ -442,7 +442,7 @@ export class DocxSerializerState<S extends Schema = any> {
             .split('\n')
             .map(
               (text, idx, arr) =>
-                new TextRun({ text, break: idx > 0 && idx !== arr.length - 1 ? 1 : undefined }),
+                new TextRun({ text, break: idx !== arr.length - 1 ? 1 : undefined }),
             ),
           style: 'BlockCode',
         }),
