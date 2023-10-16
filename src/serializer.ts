@@ -438,12 +438,7 @@ export class DocxSerializerState<S extends Schema = any> {
       // });
       this.children.push(
         new Paragraph({
-          children: node.textContent
-            .split('\n')
-            .map(
-              (text, idx, arr) =>
-                new TextRun({ text, break: idx !== arr.length - 1 ? 1 : undefined }),
-            ),
+          children: node.textContent.split('\n').map((text) => new TextRun({ text, break: 1 })),
           style: 'BlockCode',
         }),
       );
