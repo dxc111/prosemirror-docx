@@ -47,9 +47,77 @@ const styles = {
 
 export type NumberingStyles = keyof typeof styles;
 
-export function createNumbering(reference: string, style: NumberingStyles): INumbering {
+const NumberedListTypes: Record<string, LevelFormat> = {
+  decimal: LevelFormat.DECIMAL,
+  'lower-alpha': LevelFormat.LOWER_LETTER,
+  'lower-roman': LevelFormat.LOWER_ROMAN,
+  'upper-roman': LevelFormat.UPPER_ROMAN,
+};
+
+const BulletListTypes: Record<string, string> = {
+  disc: '●',
+  circle: '○',
+  square: '■',
+};
+
+function makeLevels(type: NumberingStyles, extraStyles: any) {
+  if (type === 'numbered') {
+    const listStyleType = styles
+      ? NumberedListTypes[extraStyles.listStyleType] || LevelFormat.DECIMAL
+      : LevelFormat.DECIMAL;
+
+    return new Array(6).fill(listStyleType).map((format, level) => ({
+      level,
+      format,
+      text: `${new Array(level + 1).fill(1).reduce((res, _, idx) => `${res}%${idx + 1}.`, '')}`,
+      alignment: AlignmentType.START,
+      style: {
+        run: {
+          size: 'auto',
+          color: extraStyles?.listStyleColor || 'auto',
+        },
+        paragraph: {
+          indent: {
+            left: convertInchesToTwip((level + 1) / 2),
+            hanging: convertInchesToTwip(0.18),
+          },
+        },
+      },
+    }));
+  }
+
+  return new Array(6).fill(LevelFormat.BULLET).map((format, level) => ({
+    level,
+    format,
+    text: BulletListTypes[extraStyles?.listStyleType] || '●',
+    alignment: AlignmentType.START,
+    style: {
+      run: {
+        size: 'auto',
+        color: extraStyles?.listStyleColor || 'auto',
+      },
+      paragraph: {
+        indent: {
+          left: convertInchesToTwip((level + 1) / 2),
+          hanging: convertInchesToTwip(0.18),
+        },
+      },
+    },
+  }));
+}
+
+export function createNumbering(
+  reference: string,
+  style: NumberingStyles,
+  extraStyles: any = null,
+): INumbering {
+  let numbering: any = styles?.[style];
+  if (extraStyles) {
+    const levels = makeLevels(style, extraStyles);
+    if (levels) numbering = levels;
+  }
   return {
     reference,
-    levels: styles[style],
+    levels: numbering,
   };
 }

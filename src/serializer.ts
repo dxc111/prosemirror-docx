@@ -113,6 +113,7 @@ export class DocxSerializerState<S extends Schema = any> {
     options: Options,
     fullCiteContents: Record<string, string>,
     pageBreak = 'hr',
+    private numberingStyles: Record<NumberingStyles, any> | null = null,
   ) {
     this.nodes = nodes;
     this.marks = marks;
@@ -302,7 +303,7 @@ export class DocxSerializerState<S extends Schema = any> {
   renderList(node: ProsemirrorNode<S>, style: NumberingStyles) {
     if (!this.currentNumbering) {
       const nextId = createShortId();
-      this.numbering.push(createNumbering(nextId, style));
+      this.numbering.push(createNumbering(nextId, style, this.numberingStyles?.[style] || null));
       this.currentNumbering = { reference: nextId, level: 0 };
     } else {
       const { reference, level } = this.currentNumbering;
@@ -583,6 +584,7 @@ export class DocxSerializer<S extends Schema = any> {
     pageOptions: any,
     fullCiteContents: Record<string, string>,
     externalStyles: any = null,
+    numberingStyles: any = null,
   ) {
     const state = new DocxSerializerState<S>(
       this.nodes,
@@ -590,6 +592,7 @@ export class DocxSerializer<S extends Schema = any> {
       options,
       fullCiteContents,
       pageOptions?.splitPage || 'hr',
+      numberingStyles,
     );
     state.renderContent(content);
     const f: Record<number, any> = footnotes.reduce((acc: Record<number, any>, cur, idx) => {
