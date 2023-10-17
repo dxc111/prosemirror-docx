@@ -58,7 +58,7 @@ export function createDocFromState(
   const pageSection = getHeaderAndFooter(pageOptions, getImageBuffer);
   pageSection.properties = { page: pageMargin || {} };
   sections.unshift(pageSection);
-
+  console.log(state.numbering);
   return new Document({
     background: undefined,
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
