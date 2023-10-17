@@ -584,7 +584,7 @@ export class DocxSerializer<S extends Schema = any> {
     pageOptions: any,
     fullCiteContents: Record<string, string>,
     externalStyles: any = null,
-    numberingStyles: any = null,
+    numberingStyles: Record<NumberingStyles, any> | null = null,
   ) {
     const state = new DocxSerializerState<S>(
       this.nodes,
