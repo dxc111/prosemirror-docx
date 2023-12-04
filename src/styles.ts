@@ -174,5 +174,15 @@ export default {
         indent: { left: 250 },
       },
     },
+    {
+      id: 'FootnoteList',
+      name: 'Footnote List',
+      next: 'Normal',
+      quickFormat: false,
+      run: {
+        size: 15,
+        color: '9D9D9D',
+      },
+    },
   ],
 };

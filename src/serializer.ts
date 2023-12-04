@@ -596,7 +596,9 @@ export class DocxSerializer<S extends Schema = any> {
     );
     state.renderContent(content);
     const f: Record<number, any> = footnotes.reduce((acc: Record<number, any>, cur, idx) => {
-      acc[idx + 1] = { children: [new Paragraph({ children: [new TextRun(cur)] })] };
+      acc[idx + 1] = {
+        children: [new Paragraph({ style: 'FootnoteList', children: [new TextRun(cur)] })],
+      };
       return acc;
     }, {});
 
