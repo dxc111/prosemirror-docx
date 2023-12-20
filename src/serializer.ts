@@ -114,6 +114,7 @@ export class DocxSerializerState<S extends Schema = any> {
     fullCiteContents: Record<string, string>,
     pageBreak = 'hr',
     private numberingStyles: Record<NumberingStyles, any> | null = null,
+    private cslFormatService: any = null,
   ) {
     this.nodes = nodes;
     this.marks = marks;
@@ -380,6 +381,37 @@ export class DocxSerializerState<S extends Schema = any> {
     });
   }
 
+  bib_cite(node: ProsemirrorNode<S>) {
+    try {
+      if (this.cslFormatService) {
+        const cite = this.cslFormatService.getCitationByIdSync(node.attrs.reference, 'text');
+        this.current.push(new TextRun(cite));
+      }
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(error);
+    }
+  }
+
+  bibliography(node: ProsemirrorNode<S>) {
+    try {
+      if (this.cslFormatService) {
+        const bib = this.cslFormatService.cslFormatService?.getBibliographyById('', 'text', true);
+        if (bib.length) {
+          this.closeBlock(node);
+        }
+        bib.forEach(([_, bibliography]: any) => {
+          this.current.push(new TextRun(bibliography));
+          this.addParagraphOptions({ style: 'Bibliography' });
+          this.closeBlock(node);
+        });
+      }
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(error);
+    }
+  }
+
   footnoteRef(id: string) {
     this.footnoteIds.push(id);
     this.footnoteIdx += 1;
@@ -585,6 +617,7 @@ export class DocxSerializer<S extends Schema = any> {
     fullCiteContents: Record<string, string>,
     externalStyles: any = null,
     numberingStyles: Record<NumberingStyles, any> | null = null,
+    cslFormatService: any = null,
   ) {
     const state = new DocxSerializerState<S>(
       this.nodes,
@@ -593,6 +626,7 @@ export class DocxSerializer<S extends Schema = any> {
       fullCiteContents,
       pageOptions?.splitPage || 'hr',
       numberingStyles,
+      cslFormatService,
     );
     state.renderContent(content);
     const f: Record<number, any> = footnotes.reduce((acc: Record<number, any>, cur, idx) => {
