@@ -396,7 +396,7 @@ export class DocxSerializerState<S extends Schema = any> {
   bibliography(node: ProsemirrorNode<S>) {
     try {
       if (this.cslFormatService) {
-        const bib = this.cslFormatService.cslFormatService?.getBibliographyById('', 'text', true);
+        const bib = this.cslFormatService?.getBibliographyByIdSync(undefined, 'text', true);
         if (bib.length) {
           this.closeBlock(node);
         }
