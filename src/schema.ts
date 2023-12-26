@@ -52,7 +52,13 @@ export const defaultNodes: NodeSerializer = {
   bio_citation(state, node) {
     state.bib_cite(node);
   },
+  bio_display_citation(state, node) {
+    state.renderInline(node);
+  },
   bibliography(state, node) {
+    state.bibliography(node);
+  },
+  bibliography_display(state, node) {
     state.bibliography(node);
   },
   comment(state, node) {

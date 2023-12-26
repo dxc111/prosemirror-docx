@@ -395,13 +395,22 @@ export class DocxSerializerState<S extends Schema = any> {
 
   bibliography(node: ProsemirrorNode<S>) {
     try {
-      if (this.cslFormatService) {
-        const bib = this.cslFormatService?.getBibliographyByIdSync(undefined, 'text', true);
-        if (bib.length) {
-          this.closeBlock(node);
+      if (node.type.name === 'bibliography') {
+        if (this.cslFormatService) {
+          const bib = this.cslFormatService?.getBibliographyByIdSync(undefined, 'text', true);
+          if (bib.length) {
+            this.closeBlock(node);
+          }
+          bib.forEach(([_, bibliography]: any) => {
+            this.current.push(new TextRun(bibliography));
+            this.addParagraphOptions({ style: 'Bibliography' });
+            this.closeBlock(node);
+          });
         }
-        bib.forEach(([_, bibliography]: any) => {
-          this.current.push(new TextRun(bibliography));
+      } else {
+        this.closeBlock(node);
+        node.content.forEach((n) => {
+          this.current.push(new TextRun(n.textContent));
           this.addParagraphOptions({ style: 'Bibliography' });
           this.closeBlock(node);
         });
