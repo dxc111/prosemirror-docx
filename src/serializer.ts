@@ -385,7 +385,10 @@ export class DocxSerializerState<S extends Schema = any> {
   bib_cite(node: ProsemirrorNode<S>) {
     try {
       if (this.cslFormatService) {
-        const cite = this.cslFormatService.getCitationByIdSync(node.attrs.reference, 'text');
+        const cite = this.cslFormatService.getCitationByIdSync(
+          node.attrs.reference || node.attrs.metadataId,
+          'text',
+        );
         this.current.push(new TextRun(cite));
       }
     } catch (error) {
