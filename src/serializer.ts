@@ -115,6 +115,7 @@ export class DocxSerializerState<S extends Schema = any> {
     pageBreak = 'hr',
     private numberingStyles: Record<NumberingStyles, any> | null = null,
     private cslFormatService: any = null,
+    private bibliographyTitle = 'Bibliography',
   ) {
     this.nodes = nodes;
     this.marks = marks;
@@ -398,17 +399,21 @@ export class DocxSerializerState<S extends Schema = any> {
       if (node.type.name === 'bibliography') {
         if (this.cslFormatService) {
           const bib = this.cslFormatService?.getBibliographyByIdSync(undefined, 'text', true);
-          if (bib.length) {
-            this.closeBlock(node);
-          }
+
+          this.closeBlock(node);
+          this.current.push(new TextRun(this.bibliographyTitle));
+          this.closeBlock(node, { heading: HeadingLevel.HEADING_2, style: 'heading2' });
+
           bib.forEach(([_, bibliography]: any) => {
             this.current.push(new TextRun(bibliography));
-            this.addParagraphOptions({ style: 'Bibliography' });
-            this.closeBlock(node);
+            this.closeBlock(node, { style: 'Bibliography' });
           });
         }
       } else {
         this.closeBlock(node);
+        this.current.push(new TextRun(this.bibliographyTitle));
+        this.closeBlock(node, { heading: HeadingLevel.HEADING_2, style: 'heading2' });
+
         node.content.forEach((n) => {
           this.current.push(new TextRun(n.textContent));
           this.addParagraphOptions({ style: 'Bibliography' });
@@ -627,6 +632,7 @@ export class DocxSerializer<S extends Schema = any> {
     externalStyles: any = null,
     numberingStyles: Record<NumberingStyles, any> | null = null,
     cslFormatService: any = null,
+    bibliographyTitle = 'Bibliography',
   ) {
     const state = new DocxSerializerState<S>(
       this.nodes,
@@ -636,6 +642,7 @@ export class DocxSerializer<S extends Schema = any> {
       pageOptions?.splitPage || 'hr',
       numberingStyles,
       cslFormatService,
+      bibliographyTitle,
     );
     state.renderContent(content);
     const f: Record<number, any> = footnotes.reduce((acc: Record<number, any>, cur, idx) => {
