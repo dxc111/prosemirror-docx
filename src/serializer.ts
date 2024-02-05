@@ -384,6 +384,9 @@ export class DocxSerializerState<S extends Schema = any> {
 
   bib_cite(node: ProsemirrorNode<S>) {
     try {
+      if (node.type.name === 'group_bio_citation') {
+        this.current.push(new TextRun(node.attrs.cache));
+      }
       if (this.cslFormatService) {
         const cite = this.cslFormatService.getCitationByIdSync(
           node.attrs.reference || node.attrs.metadataId,

@@ -49,6 +49,9 @@ export const defaultNodes: NodeSerializer = {
     state.renderInline(node);
     state.closeBlock(node);
   },
+  group_bio_citation(state, node) {
+    state.bib_cite(node);
+  },
   bio_citation(state, node) {
     state.bib_cite(node);
   },
