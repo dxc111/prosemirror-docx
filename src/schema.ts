@@ -43,7 +43,7 @@ const colors = [
 ];
 export const defaultNodes: NodeSerializer = {
   text(state, node) {
-    state.text((node.text ?? '').replace(/\u200b/g, ''));
+    state.text((node.text ?? '').replace(/\u200b/g, '').replace(/\u00A0/g, ' '));
   },
   paragraph(state, node) {
     state.renderInline(node);
