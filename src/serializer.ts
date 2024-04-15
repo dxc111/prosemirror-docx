@@ -408,7 +408,7 @@ export class DocxSerializerState<S extends Schema = any> {
 
           this.closeBlock(node);
           this.current.push(new TextRun(this.bibliographyTitle));
-          this.closeBlock(node, { heading: HeadingLevel.HEADING_4, style: 'BibliographyTitle' });
+          this.closeBlock(node, { style: 'BibliographyTitle' });
 
           bib.forEach(([_, bibliography]: any) => {
             this.current.push(new TextRun(bibliography));
@@ -418,7 +418,7 @@ export class DocxSerializerState<S extends Schema = any> {
       } else {
         this.closeBlock(node);
         this.current.push(new TextRun(this.bibliographyTitle));
-        this.closeBlock(node, { heading: HeadingLevel.HEADING_4, style: 'BibliographyTitle' });
+        this.closeBlock(node, { style: 'BibliographyTitle' });
 
         node.content.forEach((n) => {
           this.current.push(new TextRun(n.textContent));
