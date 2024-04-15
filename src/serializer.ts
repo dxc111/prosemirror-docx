@@ -408,7 +408,7 @@ export class DocxSerializerState<S extends Schema = any> {
 
           this.closeBlock(node);
           this.current.push(new TextRun(this.bibliographyTitle));
-          this.closeBlock(node, { heading: HeadingLevel.HEADING_2, style: 'heading2' });
+          this.closeBlock(node, { heading: HeadingLevel.HEADING_4, style: 'heading4' });
 
           bib.forEach(([_, bibliography]: any) => {
             this.current.push(new TextRun(bibliography));
