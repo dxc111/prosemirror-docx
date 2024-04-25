@@ -651,8 +651,12 @@ export class DocxSerializer<S extends Schema = any> {
     cslFormatService: any = null,
     bibliographyTitle = 'Bibliography',
     footnoteTitle = 'Footnotes',
+    log?: (...args: any[]) => void,
   ) {
     const isEndNotes = pageOptions?.footnotes && pageOptions?.footnotesPosition === 'section';
+    if (log) {
+      log('isEndNotes: ', isEndNotes);
+    }
     const state = new DocxSerializerState<S>(
       this.nodes,
       this.marks,
@@ -677,7 +681,9 @@ export class DocxSerializer<S extends Schema = any> {
         isEndNotes &&
         state.children[state.children.length - 1].style?.startsWith('Bibliography')
       ) {
-        console.log('Bibliography is Last');
+        if (log) {
+          log('Bibliography is Last');
+        }
         const idx = state.children.findIndex((c: any) => c.style?.startsWith('Bibliography'));
         if (idx > -1) {
           state.children.splice(
@@ -704,7 +710,9 @@ export class DocxSerializer<S extends Schema = any> {
         );
       }
     } catch (e) {
-      console.log('error adding footnotes: ', e);
+      if (log) {
+        log('Error adding footnotes: ', e);
+      }
     }
 
     return createDocFromState(
