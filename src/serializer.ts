@@ -701,7 +701,7 @@ export class DocxSerializer<S extends Schema = any> {
             ...footnotes.map(
               (footnote, i) =>
                 new Paragraph({
-                  style: 'FootnoteList',
+                  style: 'Bibliography',
                   children: [new TextRun(`${i + 1}. `), new TextRun(footnote)],
                 }),
             ),
@@ -716,7 +716,7 @@ export class DocxSerializer<S extends Schema = any> {
             ...footnotes.map(
               (footnote, i) =>
                 new Paragraph({
-                  style: 'FootnoteList',
+                  style: 'Bibliography',
                   children: [new TextRun(`${i + 1}. `), new TextRun(footnote)],
                 }),
             ),
