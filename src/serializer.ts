@@ -694,6 +694,10 @@ export class DocxSerializer<S extends Schema = any> {
             idx,
             1,
             new Paragraph({ children: [] }),
+            new Paragraph({
+              text: footnoteTitle,
+              style: 'BibliographyTitle',
+            }),
             ...footnotes.map(
               (footnote, i) =>
                 new Paragraph({
