@@ -46,8 +46,12 @@ export const defaultNodes: NodeSerializer = {
     state.text((node.text ?? '').replace(/\u200b/g, '').replace(/\u00A0/g, ' '));
   },
   paragraph(state, node) {
-    state.renderInline(node);
-    state.closeBlock(node);
+    if (node.attrs.footnotesHole) {
+      state.children.push('[[THIS_IS_A_FOOTNOTES_HOLE]]');
+    } else {
+      state.renderInline(node);
+      state.closeBlock(node);
+    }
   },
   group_bio_citation(state, node) {
     state.bib_cite(node);

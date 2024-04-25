@@ -101,7 +101,7 @@ export class DocxSerializerState<S extends Schema = any> {
 
   private footnoteIdx: number;
 
-  private endNote = false;
+  private footnoteState = '';
 
   private footnoteIds: string[];
 
@@ -118,7 +118,7 @@ export class DocxSerializerState<S extends Schema = any> {
     private numberingStyles: Record<NumberingStyles, any> | null = null,
     private cslFormatService: any = null,
     private bibliographyTitle = 'Bibliography',
-    endNote = false,
+    footnoteState = 'disable',
   ) {
     this.nodes = nodes;
     this.marks = marks;
@@ -129,7 +129,7 @@ export class DocxSerializerState<S extends Schema = any> {
     this.footnoteIds = [];
     this.fullCiteContents = fullCiteContents;
     this.pageBreak = pageBreak;
-    this.endNote = endNote;
+    this.footnoteState = footnoteState;
   }
 
   renderContent(parent: ProsemirrorNode, opts?: IParagraphOptions) {
@@ -437,10 +437,11 @@ export class DocxSerializerState<S extends Schema = any> {
   }
 
   footnoteRef(id: string) {
+    if (this.footnoteState === 'disable') return;
     this.footnoteIds.push(id);
     this.footnoteIdx += 1;
     this.current.push(
-      this.endNote
+      this.footnoteState === 'endnotes'
         ? new TextRun({
             text: `${this.footnoteIdx}`,
             style: 'FootnoteReference',
@@ -653,7 +654,13 @@ export class DocxSerializer<S extends Schema = any> {
     footnoteTitle = 'Footnotes',
     log?: (...args: any[]) => void,
   ) {
+    const enableFootnotes = !!pageOptions?.footnotes;
     const isEndNotes = pageOptions?.footnotes && pageOptions?.footnotesPosition === 'page';
+    let footnoteState = enableFootnotes ? 'enable' : 'disable';
+    if (isEndNotes) {
+      footnoteState = 'endnotes';
+    }
+
     if (log) {
       log('isEndNotes: ', isEndNotes);
     }
@@ -666,7 +673,7 @@ export class DocxSerializer<S extends Schema = any> {
       numberingStyles,
       cslFormatService,
       bibliographyTitle,
-      isEndNotes,
+      footnoteState,
     );
     state.renderContent(content);
     const f: Record<number, any> = footnotes.reduce((acc: Record<number, any>, cur, idx) => {
@@ -677,37 +684,45 @@ export class DocxSerializer<S extends Schema = any> {
     }, {});
 
     try {
-      if (
-        isEndNotes &&
-        state.children[state.children.length - 1].style?.startsWith('Bibliography')
-      ) {
-        if (log) {
-          log('Bibliography is Last');
-        }
-        const idx = state.children.findIndex((c: any) => c.style?.startsWith('Bibliography'));
+      if (isEndNotes) {
+        const idx = state.children.findIndex((c: any) => c === '[[THIS_IS_A_FOOTNOTES_HOLE]]');
         if (idx > -1) {
+          if (log) {
+            log('Bibliography is Last');
+          }
           state.children.splice(
             idx,
-            0,
-            ...footnotes.map(
-              (footnote) =>
-                new Paragraph({ style: 'FootnoteList', children: [new TextRun(footnote)] }),
-            ),
+            1,
             new Paragraph({ children: [] }),
+            ...footnotes.map(
+              (footnote, i) =>
+                new Paragraph({
+                  style: 'FootnoteList',
+                  children: [new TextRun(`${i + 1}. `), new TextRun(footnote)],
+                }),
+            ),
+          );
+        } else {
+          state.children.push(
+            new Paragraph({ children: [] }),
+            new Paragraph({
+              text: footnoteTitle,
+              style: 'BibliographyTitle',
+            }),
+            ...footnotes.map(
+              (footnote, i) =>
+                new Paragraph({
+                  style: 'FootnoteList',
+                  children: [new TextRun(`${i + 1}. `), new TextRun(footnote)],
+                }),
+            ),
           );
         }
-      } else if (isEndNotes) {
-        state.children.push(
-          new Paragraph({ children: [] }),
-          new Paragraph({
-            text: footnoteTitle,
-            style: 'BibliographyTitle',
-          }),
-          ...footnotes.map(
-            (footnote) =>
-              new Paragraph({ style: 'FootnoteList', children: [new TextRun(footnote)] }),
-          ),
-        );
+      }
+
+      const index = state.children.findIndex((c: any) => c === '[[THIS_IS_A_FOOTNOTES_HOLE]]');
+      if (index > -1) {
+        state.children.splice(index, 1);
       }
     } catch (e) {
       if (log) {
@@ -718,7 +733,7 @@ export class DocxSerializer<S extends Schema = any> {
     return createDocFromState(
       state,
       footerText,
-      isEndNotes ? {} : f,
+      isEndNotes || !enableFootnotes ? {} : f,
       pageOptions,
       options.getImageBuffer,
       externalStyles,
