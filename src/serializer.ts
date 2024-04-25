@@ -101,6 +101,8 @@ export class DocxSerializerState<S extends Schema = any> {
 
   private footnoteIdx: number;
 
+  private endNote = false;
+
   private footnoteIds: string[];
 
   private maxImageWidth = 600;
@@ -116,6 +118,7 @@ export class DocxSerializerState<S extends Schema = any> {
     private numberingStyles: Record<NumberingStyles, any> | null = null,
     private cslFormatService: any = null,
     private bibliographyTitle = 'Bibliography',
+    endNote = false,
   ) {
     this.nodes = nodes;
     this.marks = marks;
@@ -126,6 +129,7 @@ export class DocxSerializerState<S extends Schema = any> {
     this.footnoteIds = [];
     this.fullCiteContents = fullCiteContents;
     this.pageBreak = pageBreak;
+    this.endNote = endNote;
   }
 
   renderContent(parent: ProsemirrorNode, opts?: IParagraphOptions) {
@@ -435,7 +439,14 @@ export class DocxSerializerState<S extends Schema = any> {
   footnoteRef(id: string) {
     this.footnoteIds.push(id);
     this.footnoteIdx += 1;
-    this.current.push(new FootnoteReferenceRun(this.footnoteIdx));
+    this.current.push(
+      this.endNote
+        ? new TextRun({
+            text: `${this.footnoteIdx}`,
+            style: 'FootnoteReference',
+          })
+        : new FootnoteReferenceRun(this.footnoteIdx),
+    );
   }
 
   image(src: string, align: AlignOptions = 'center', widthPercent = 90) {
@@ -639,7 +650,9 @@ export class DocxSerializer<S extends Schema = any> {
     numberingStyles: Record<NumberingStyles, any> | null = null,
     cslFormatService: any = null,
     bibliographyTitle = 'Bibliography',
+    footnoteTitle = 'Footnotes',
   ) {
+    const isEndNotes = pageOptions?.footnotes && pageOptions?.footnotesPosition === 'section';
     const state = new DocxSerializerState<S>(
       this.nodes,
       this.marks,
@@ -649,6 +662,7 @@ export class DocxSerializer<S extends Schema = any> {
       numberingStyles,
       cslFormatService,
       bibliographyTitle,
+      isEndNotes,
     );
     state.renderContent(content);
     const f: Record<number, any> = footnotes.reduce((acc: Record<number, any>, cur, idx) => {
@@ -658,10 +672,45 @@ export class DocxSerializer<S extends Schema = any> {
       return acc;
     }, {});
 
+    try {
+      if (
+        isEndNotes &&
+        state.children[state.children.length - 1].style?.startsWith('Bibliography')
+      ) {
+        console.log('Bibliography is Last');
+        const idx = state.children.findIndex((c: any) => c.style?.startsWith('Bibliography'));
+        if (idx > -1) {
+          state.children.splice(
+            idx,
+            0,
+            ...footnotes.map(
+              (footnote) =>
+                new Paragraph({ style: 'FootnoteList', children: [new TextRun(footnote)] }),
+            ),
+            new Paragraph({ children: [] }),
+          );
+        }
+      } else if (isEndNotes) {
+        state.children.push(
+          new Paragraph({ children: [] }),
+          new Paragraph({
+            text: footnoteTitle,
+            style: 'BibliographyTitle',
+          }),
+          ...footnotes.map(
+            (footnote) =>
+              new Paragraph({ style: 'FootnoteList', children: [new TextRun(footnote)] }),
+          ),
+        );
+      }
+    } catch (e) {
+      console.log('error adding footnotes: ', e);
+    }
+
     return createDocFromState(
       state,
       footerText,
-      f,
+      isEndNotes ? {} : f,
       pageOptions,
       options.getImageBuffer,
       externalStyles,
