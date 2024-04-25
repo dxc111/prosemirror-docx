@@ -653,7 +653,7 @@ export class DocxSerializer<S extends Schema = any> {
     footnoteTitle = 'Footnotes',
     log?: (...args: any[]) => void,
   ) {
-    const isEndNotes = pageOptions?.footnotes && pageOptions?.footnotesPosition === 'section';
+    const isEndNotes = pageOptions?.footnotes && pageOptions?.footnotesPosition === 'page';
     if (log) {
       log('isEndNotes: ', isEndNotes);
     }
