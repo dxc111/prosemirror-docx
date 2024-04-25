@@ -684,7 +684,7 @@ export class DocxSerializer<S extends Schema = any> {
     }, {});
 
     try {
-      if (isEndNotes) {
+      if (isEndNotes && footnotes.length > 0) {
         const idx = state.children.findIndex((c: any) => c === '[[THIS_IS_A_FOOTNOTES_HOLE]]');
         if (idx > -1) {
           if (log) {
@@ -723,14 +723,14 @@ export class DocxSerializer<S extends Schema = any> {
           );
         }
       }
-
-      const index = state.children.findIndex((c: any) => c === '[[THIS_IS_A_FOOTNOTES_HOLE]]');
-      if (index > -1) {
-        state.children.splice(index, 1);
-      }
     } catch (e) {
       if (log) {
         log('Error adding footnotes: ', e);
+      }
+    } finally {
+      const index = state.children.findIndex((c: any) => c === '[[THIS_IS_A_FOOTNOTES_HOLE]]');
+      if (index > -1) {
+        state.children.splice(index, 1);
       }
     }
 
