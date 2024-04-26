@@ -238,7 +238,7 @@ export class DocxSerializerState<S extends Schema = any> {
 
   horizontal_rule(node: ProsemirrorNode<S>) {
     if (this.pageBreak === 'hr') {
-      this.closeBlock(node, { pageBreakBefore: true });
+      this.addParagraphOptions({ pageBreakBefore: true });
     } else {
       // Kinda hacky, but this works to insert two paragraphs, the first with a break
       this.closeBlock(node, { thematicBreak: true });
