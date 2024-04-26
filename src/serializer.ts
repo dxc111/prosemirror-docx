@@ -655,7 +655,10 @@ export class DocxSerializer<S extends Schema = any> {
     log?: (...args: any[]) => void,
   ) {
     const enableFootnotes = !!pageOptions?.footnotes;
-    const isEndNotes = pageOptions?.footnotes && pageOptions?.footnotesPosition === 'page';
+    const isEndNotes =
+      enableFootnotes &&
+      (pageOptions?.footnotesPosition === 'page' ||
+        pageOptions?.footnotesPosition === 'before_bib');
     let footnoteState = enableFootnotes ? 'enable' : 'disable';
     if (isEndNotes) {
       footnoteState = 'endnotes';
@@ -686,7 +689,7 @@ export class DocxSerializer<S extends Schema = any> {
     try {
       if (isEndNotes && footnotes.length > 0) {
         const idx = state.children.findIndex((c: any) => c === '[[THIS_IS_A_FOOTNOTES_HOLE]]');
-        if (idx > -1) {
+        if (idx > -1 && pageOptions?.footnotesPosition === 'before_bib') {
           if (log) {
             log('Bibliography is Last');
           }
