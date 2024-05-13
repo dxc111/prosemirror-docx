@@ -73,7 +73,7 @@ function makeLevels(type: NumberingStyles, extraStyles: any) {
       alignment: AlignmentType.START,
       style: {
         run: {
-          size: '18',
+          size: extraStyles?.fontSize || 18,
           color: extraStyles?.listStyleColor || 'auto',
         },
         paragraph: {
