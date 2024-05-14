@@ -60,7 +60,9 @@ export const defaultNodes: NodeSerializer = {
     state.bib_cite(node);
   },
   bio_display_citation(state, node) {
-    state.renderInline(node);
+    const content = state.transformHtmlToNode(node.attrs.content);
+
+    state.renderInline(content || node);
   },
   bibliography(state, node) {
     state.bibliography(node);

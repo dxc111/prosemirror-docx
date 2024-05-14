@@ -109,6 +109,8 @@ export class DocxSerializerState<S extends Schema = any> {
 
   public fullCiteContents: Record<string, string>;
 
+  transformHtmlToNode: (html: string) => null;
+
   constructor(
     nodes: NodeSerializer<S>,
     marks: MarkSerializer<S>,
@@ -119,6 +121,7 @@ export class DocxSerializerState<S extends Schema = any> {
     private cslFormatService: any = null,
     private bibliographyTitle = 'Bibliography',
     footnoteState = 'disable',
+    transformHtmlToNode = (html: string) => null,
   ) {
     this.nodes = nodes;
     this.marks = marks;
@@ -130,6 +133,7 @@ export class DocxSerializerState<S extends Schema = any> {
     this.fullCiteContents = fullCiteContents;
     this.pageBreak = pageBreak;
     this.footnoteState = footnoteState;
+    this.transformHtmlToNode = transformHtmlToNode;
   }
 
   renderContent(parent: ProsemirrorNode, opts?: IParagraphOptions) {
@@ -652,6 +656,7 @@ export class DocxSerializer<S extends Schema = any> {
     cslFormatService: any = null,
     bibliographyTitle = 'Bibliography',
     footnoteTitle = 'Footnotes',
+    transformHtmlToNode?: (html: string) => any,
     log?: (...args: any[]) => void,
   ) {
     const enableFootnotes = !!pageOptions?.footnotes;
@@ -677,6 +682,7 @@ export class DocxSerializer<S extends Schema = any> {
       cslFormatService,
       bibliographyTitle,
       footnoteState,
+      transformHtmlToNode,
     );
     state.renderContent(content);
     const f: Record<number, any> = footnotes.reduce((acc: Record<number, any>, cur, idx) => {
