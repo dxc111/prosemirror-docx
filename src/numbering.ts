@@ -98,8 +98,8 @@ function makeLevels(type: NumberingStyles, extraStyles: any) {
       },
       paragraph: {
         indent: {
-          left: convertInchesToTwip((level + 1) / 2),
-          hanging: convertInchesToTwip(0.18),
+          left: convertInchesToTwip(0.25 * (level + 1)),
+          hanging: convertInchesToTwip(0.25),
         },
       },
     },
