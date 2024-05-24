@@ -334,7 +334,26 @@ export class DocxSerializerState<S extends Schema = any> {
   renderListItem(node: ProsemirrorNode<S>) {
     if (!this.currentNumbering) throw new Error('Trying to create a list item without a list?');
     this.addParagraphOptions({ numbering: this.currentNumbering });
-    this.renderContent(node);
+    // this.renderContent(node);
+    let onlyParagraph = true;
+    node.forEach((n, _, i) => {
+      if (n.type.name === 'paragraph' && onlyParagraph) {
+        if (this.current.length > 0) {
+          // add a break between paragraphs
+          this.current.push(new TextRun({ break: 1 }));
+        }
+        this.renderInline(n);
+      } else {
+        if (this.current.length > 0) {
+          this.closeBlock(n);
+        }
+        onlyParagraph = false;
+        this.render(n, node, i);
+      }
+    });
+    if (onlyParagraph) {
+      this.closeBlock(node);
+    }
   }
 
   addParagraphOptions(opts: IParagraphOptions) {
