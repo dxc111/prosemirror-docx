@@ -504,6 +504,20 @@ export class DocxSerializerState<S extends Schema = any> {
     });
   }
 
+  imageInline(src: string) {
+    const { arrayBuffer, width, height } = this.options.getImageBuffer(src);
+
+    this.current.push(
+      new ImageRun({
+        data: arrayBuffer,
+        transformation: {
+          width,
+          height,
+        },
+      }),
+    );
+  }
+
   addAside(text = '') {
     this.children.push(
       new Paragraph({
