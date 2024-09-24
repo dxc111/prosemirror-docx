@@ -1,4 +1,4 @@
-import { BorderStyle, HeadingLevel, UnderlineType } from 'docx';
+import { AlignmentType, BorderStyle, HeadingLevel, UnderlineType } from 'docx';
 import { DocxSerializer, MarkSerializer, NodeSerializer } from './serializer';
 import { coverColorToHex } from './utils';
 import sizeTransfer from './sizeTransfer';
@@ -140,8 +140,10 @@ export const defaultNodes: NodeSerializer = {
     // const { id = Date.now(), numbered } = node.attrs;
     // state.math(node.attrs.input, { inline: false, numbered, id });
     // state.closeBlock(node);
-    state.image(node.attrs.input, 'center', 100);
-    state.closeBlock(node);
+    state.imageInline(node.attrs.input);
+    state.closeBlock(node, {
+      alignment: AlignmentType.CENTER,
+    });
   },
   link(state, node) {
     // Note, this is handled specifically in the serializer
