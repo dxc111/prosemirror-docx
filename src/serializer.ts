@@ -36,6 +36,11 @@ type Mutable<T> = {
   -readonly [k in keyof T]: T[k];
 };
 
+function normalizeText(text: string) {
+  // eslint-disable-next-line no-misleading-character-class
+  return (text || '').replace(/[\u200B\u200C\u200D\uFEFF]/g, '');
+}
+
 const MAX_IMAGE_WIDTH = 600;
 // This is duplicated from @curvenote/schema
 export type AlignOptions = 'left' | 'center' | 'right';
@@ -365,10 +370,11 @@ export class DocxSerializerState<S extends Schema = any> {
   }
 
   text(text: string | null | undefined, opts?: IRunOptions) {
+    const textNormalized = normalizeText(text || '');
     if (!text) return;
     this.current.push(
       new TextRun({
-        text,
+        text: textNormalized,
         ...(currentLink ? { style: 'Hyperlink' } : {}),
         ...this.nextRunOpts,
         ...opts,
@@ -540,7 +546,7 @@ export class DocxSerializerState<S extends Schema = any> {
       // });
       this.children.push(
         new Paragraph({
-          children: node.textContent
+          children: normalizeText(node.textContent)
             .split('\n')
             .map((text, idx) => new TextRun({ text, break: idx > 0 ? 1 : undefined })),
           style: 'BlockCode',
@@ -720,7 +726,9 @@ export class DocxSerializer<S extends Schema = any> {
     state.renderContent(content);
     const f: Record<number, any> = footnotes.reduce((acc: Record<number, any>, cur, idx) => {
       acc[idx + 1] = {
-        children: [new Paragraph({ style: 'FootnoteList', children: [new TextRun(cur)] })],
+        children: [
+          new Paragraph({ style: 'FootnoteList', children: [new TextRun(normalizeText(cur))] }),
+        ],
       };
       return acc;
     }, {});
@@ -744,7 +752,7 @@ export class DocxSerializer<S extends Schema = any> {
               (footnote, i) =>
                 new Paragraph({
                   style: 'Bibliography',
-                  children: [new TextRun(`${i + 1}. `), new TextRun(footnote)],
+                  children: [new TextRun(`${i + 1}. `), new TextRun(normalizeText(footnote))],
                 }),
             ),
           );
