@@ -83,7 +83,7 @@ export const defaultNodes: NodeSerializer = {
       HeadingLevel.HEADING_5,
       HeadingLevel.HEADING_6,
     ][node.attrs.level - 1];
-    state.closeBlock(node, { heading, style: `heading${node.attrs.level}` });
+    state.closeBlock(node, { heading, style: undefined });
   },
   hierarchy_title(state, node) {
     state.hierarchy_title(node);
