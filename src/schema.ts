@@ -192,22 +192,22 @@ export const defaultNodes: NodeSerializer = {
         //   state.text(midText);
         // }
       } else {
-        let href = '';
-        try {
-          if (String(citeId || '').startsWith('zotero')) {
-            href = [...citeId.matchAll(zoteroReg)].at(-1)?.[2];
-          }
-        } catch (e) {
-          console.log('eport cite error: ', e);
-        }
+        // let href = '';
+        // try {
+        //   if (String(citeId || '').startsWith('zotero')) {
+        //     href = [...citeId.matchAll(zoteroReg)].at(-1)?.[2];
+        //   }
+        // } catch (e) {
+        //   console.log('eport cite error: ', e);
+        // }
 
-        if (href) {
-          state.openLink(href);
-        }
+        // if (href) {
+        //   state.openLink(href);
+        // }
         state.renderInline(node);
-        if (href) {
-          state.closeLink();
-        }
+        // if (href) {
+        //   state.closeLink();
+        // }
       }
     } catch (e) {
       console.log('eport cite error: ', e);
