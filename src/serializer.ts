@@ -162,6 +162,23 @@ export class DocxSerializerState<S extends Schema = any> {
       .reduce((a, b) => ({ ...a, ...b }), {});
   }
 
+  renderParagraphHtml(html: string) {
+    // eslint-disable-next-line no-param-reassign
+    html = normalizeText(html);
+    const node = this.transformHtmlToNode(html);
+    if (node) {
+      // this.render(node, node, 0);
+      const cache = this.current;
+      this.current = [];
+      this.renderInline(node);
+      const res = this.current;
+      this.current = cache;
+
+      return res;
+    }
+    return [new TextRun(html)];
+  }
+
   openLink(href: string) {
     this.addRunOptions({ style: 'Hyperlink' });
     // TODO: https://github.com/dolanmiu/docx/issues/1119
@@ -723,11 +740,16 @@ export class DocxSerializer<S extends Schema = any> {
       footnoteState,
       transformHtmlToNode,
     );
+    // eslint-disable-next-line no-param-reassign
+    footnotes = footnotes.map((f) => state.renderParagraphHtml(f));
     state.renderContent(content);
     const f: Record<number, any> = footnotes.reduce((acc: Record<number, any>, cur, idx) => {
       acc[idx + 1] = {
         children: [
-          new Paragraph({ style: 'FootnoteList', children: [new TextRun(normalizeText(cur))] }),
+          new Paragraph({
+            style: 'FootnoteList',
+            children: (Array.isArray(cur) ? cur : [cur]) as any,
+          }),
         ],
       };
       return acc;
@@ -752,7 +774,10 @@ export class DocxSerializer<S extends Schema = any> {
               (footnote, i) =>
                 new Paragraph({
                   style: 'Bibliography',
-                  children: [new TextRun(`${i + 1}. `), new TextRun(normalizeText(footnote))],
+                  children: [
+                    new TextRun(`${i + 1}. `),
+                    ...(Array.isArray(footnote) ? footnote : [footnote]),
+                  ],
                 }),
             ),
           );
@@ -767,7 +792,10 @@ export class DocxSerializer<S extends Schema = any> {
               (footnote, i) =>
                 new Paragraph({
                   style: 'Bibliography',
-                  children: [new TextRun(`${i + 1}. `), new TextRun(footnote)],
+                  children: [
+                    new TextRun(`${i + 1}. `),
+                    ...(Array.isArray(footnote) ? footnote : [footnote]),
+                  ],
                 }),
             ),
           );
