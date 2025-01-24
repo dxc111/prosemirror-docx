@@ -204,6 +204,14 @@ export class DocxSerializerState<S extends Schema = any> {
 
   wrapComment(node: ProsemirrorNode) {
     if (node.type.name === 'comment') {
+      let time = Date.now();
+      try {
+        time = parseInt(node.attrs.createDate, 10);
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.error('Error parsing comment time: ', e);
+      }
+
       this.comments.push({
         id: this.curIdx,
         children: [
@@ -215,7 +223,7 @@ export class DocxSerializerState<S extends Schema = any> {
             ],
           }),
         ],
-        date: new Date(node.attrs.createDate),
+        date: new Date(time),
       });
       this.current.push(new CommentRangeStart(this.curIdx));
       this.renderInline(node);
