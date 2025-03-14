@@ -247,7 +247,7 @@ export const defaultMarks: MarkSerializer = {
   font_size(state, node, mark) {
     try {
       return {
-        size: sizeTransfer(parseInt(mark.attrs.fontSize || '', 10)),
+        size: sizeTransfer(parseFloat(mark.attrs.fontSize || '10')),
       };
     } catch (e) {
       return {};
