@@ -504,6 +504,8 @@ export class DocxSerializerState<S extends Schema = any> {
     );
   }
 
+  imageWithType() {}
+
   image(src: string, align: AlignOptions = 'center', widthPercent = 90) {
     const { arrayBuffer, width: rawW, height: rawH } = this.options.getImageBuffer(src);
 
