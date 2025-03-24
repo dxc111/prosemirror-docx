@@ -27,6 +27,7 @@ import {
   TabStopPosition,
   TabStopType,
   TextRun,
+  TextWrappingType,
   WidthType,
 } from 'docx';
 import { createNumbering, INumbering, NumberingStyles } from './numbering';
@@ -518,6 +519,17 @@ export class DocxSerializerState<S extends Schema = any> {
         transformation: {
           width,
           height: width * aspect,
+        },
+        floating: {
+          horizontalPosition: {
+            offset: 0,
+          },
+          verticalPosition: {
+            offset: 0,
+          },
+          wrap: {
+            type: TextWrappingType.TOP_AND_BOTTOM,
+          },
         },
       }),
     );
