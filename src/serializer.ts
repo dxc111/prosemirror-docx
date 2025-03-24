@@ -38,8 +38,12 @@ type Mutable<T> = {
 };
 
 function normalizeText(text: string) {
-  // eslint-disable-next-line no-misleading-character-class
-  return (text || '').replace(/[\u200B\u200C\u200D\uFEFF]/g, '');
+  return (
+    (text || '') // eslint-disable-next-line no-misleading-character-class
+      .replace(/[\u200B\u200C\u200D\uFEFF]/g, '')
+      // eslint-disable-next-line no-control-regex
+      .replace(/[\u0000-\u0008\u000B-\u000C\u000E-\u001F]/g, '')
+  );
 }
 
 const MAX_IMAGE_WIDTH = 600;
