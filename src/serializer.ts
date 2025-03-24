@@ -546,10 +546,6 @@ export class DocxSerializerState<S extends Schema = any> {
     }
     this.addParagraphOptions({
       alignment,
-      spacing: {
-        before: 1,
-        after: 1,
-      },
     });
   }
 
