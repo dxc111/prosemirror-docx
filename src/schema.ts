@@ -45,7 +45,12 @@ const colors = [
 ];
 export const defaultNodes: NodeSerializer = {
   text(state, node) {
-    state.text((node.text ?? '').replace(/\u200b/g, '').replace(/\u00A0/g, ' '));
+    state.text(
+      (node.text ?? '')
+        .replace(/\u200b/g, '')
+        // eslint-disable-next-line no-control-regex
+        .replace(/[\u0000-\u0008\u000B-\u000C\u000E-\u001F]/g, ''),
+    );
   },
   paragraph(state, node) {
     if (node.attrs.footnotesHole) {
