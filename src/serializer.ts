@@ -520,17 +520,17 @@ export class DocxSerializerState<S extends Schema = any> {
           width,
           height: width * aspect,
         },
-        floating: {
-          horizontalPosition: {
-            offset: 0,
-          },
-          verticalPosition: {
-            offset: 0,
-          },
-          wrap: {
-            type: TextWrappingType.TOP_AND_BOTTOM,
-          },
-        },
+        // floating: {
+        //   horizontalPosition: {
+        //     offset: 0,
+        //   },
+        //   verticalPosition: {
+        //     offset: 0,
+        //   },
+        //   wrap: {
+        //     type: TextWrappingType.TOP_AND_BOTTOM,
+        //   },
+        // },
       }),
     );
     let alignment: AlignmentType;
@@ -546,6 +546,10 @@ export class DocxSerializerState<S extends Schema = any> {
     }
     this.addParagraphOptions({
       alignment,
+      spacing: {
+        before: 1,
+        after: 1,
+      },
     });
   }
 
