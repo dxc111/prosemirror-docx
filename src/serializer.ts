@@ -15,6 +15,7 @@ import {
   IParagraphOptions,
   IRunOptions,
   ITableCellOptions,
+  LineRuleType,
   Math,
   MathRun,
   Paragraph,
@@ -550,6 +551,7 @@ export class DocxSerializerState<S extends Schema = any> {
     }
     this.addParagraphOptions({
       alignment,
+      style: 'Normal',
     });
   }
 
