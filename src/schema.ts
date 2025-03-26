@@ -144,6 +144,7 @@ export const defaultNodes: NodeSerializer = {
     // state.closeBlock(node);
     state.imageInline(node.attrs.input);
     state.closeBlock(node, {
+      style: 'Normal',
       alignment: AlignmentType.CENTER,
     });
   },
