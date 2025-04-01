@@ -580,7 +580,7 @@ export class DocxSerializerState<S extends Schema = any> {
 
   addCodeBlock(node: ProsemirrorNode) {
     if (node.textContent) {
-      this.children.push(new Paragraph({ text: '' }));
+      // this.children.push(new Paragraph({ text: '' }));
       // node.textContent.split('\n').forEach((text) => {
       //   this.children.push(
       //     new Paragraph({
@@ -597,7 +597,7 @@ export class DocxSerializerState<S extends Schema = any> {
           style: 'BlockCode',
         }),
       );
-      this.children.push(new Paragraph({ text: '' }));
+      // this.children.push(new Paragraph({ text: '' }));
     }
   }
 
