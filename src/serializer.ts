@@ -675,9 +675,7 @@ export class DocxSerializerState<S extends Schema = any> {
 
     node.content.forEach((column: ProsemirrorNode<S>, _, idx) => {
       this.children = [];
-      if (idx !== 0) {
-        columnsItems.push(new Paragraph({ children: [new ColumnBreak()] }));
-      }
+
       columnsWidth.push(new Column({ width: (parseFloat(column.attrs.basis) / 100) * 9010 }));
       this.maxImageWidth = (MAX_IMAGE_WIDTH * parseFloat(column.attrs.basis)) / 100;
       this.renderContent(column);
