@@ -99,6 +99,8 @@ export class DocxSerializerState<S extends Schema = any> {
 
   current: ParagraphChild[] | any = [];
 
+  currentBlockNode = '';
+
   currentLink?: { link: string; children: IRunOptions[] };
 
   comments: ICommentOptions[] = [];
@@ -555,8 +557,23 @@ export class DocxSerializerState<S extends Schema = any> {
     });
   }
 
-  imageInline(src: string) {
+  imageInline(src: string, maxHeight = 0) {
     const { arrayBuffer, width, height } = this.options.getImageBuffer(src);
+
+    if (maxHeight) {
+      const aspect = height / width;
+      const newWidth = maxHeight / aspect;
+      this.current.push(
+        new ImageRun({
+          data: arrayBuffer,
+          transformation: {
+            width: newWidth,
+            height: maxHeight,
+          },
+        }),
+      );
+      return;
+    }
 
     this.current.push(
       new ImageRun({
@@ -675,6 +692,26 @@ export class DocxSerializerState<S extends Schema = any> {
 
     node.content.forEach((column: ProsemirrorNode<S>, _, idx) => {
       this.children = [];
+
+      if (idx > 0 && idx < node.childCount - 1) {
+        // const lastParagraph = columnsItems[columnsItems.length - 1];
+        // if (lastParagraph && lastParagraph instanceof Paragraph) {
+        //   lastParagraph.addChildElement(new ColumnBreak());
+        // } else {
+        //   columnsItems.push(new Paragraph({ children: [new ColumnBreak()] }));
+        // }
+        columnsItems.push(
+          new Paragraph({
+            children: [new ColumnBreak()],
+            spacing: {
+              line: 0,
+              lineRule: LineRuleType.EXACT,
+              before: 0,
+              after: 0,
+            },
+          }),
+        );
+      }
 
       columnsWidth.push(new Column({ width: (parseFloat(column.attrs.basis) / 100) * 9010 }));
       this.maxImageWidth = (MAX_IMAGE_WIDTH * parseFloat(column.attrs.basis)) / 100;
