@@ -165,6 +165,9 @@ export const defaultNodes: NodeSerializer = {
   columns(state, node) {
     state.columns(node);
   },
+  multi_columns(state, node) {
+    state.equalColumns(node);
+  },
   inlineCitation(state, node) {
     try {
       const { citeId, isFullCite } = node.attrs;

@@ -740,6 +740,35 @@ export class DocxSerializerState<S extends Schema = any> {
     this.maxImageWidth = MAX_IMAGE_WIDTH;
   }
 
+  equalColumns(node: ProsemirrorNode<S>, colCount = 0, colGap = 0) {
+    if (node.childCount < 1) return;
+    const actualChildren = this.children;
+    const columnsItems: Paragraph[] = [];
+    const columns = colCount || node.attrs.columns;
+    const columnGap = colGap || +node.attrs.columnGap || 1;
+
+    // 等宽多栏
+    this.maxImageWidth = MAX_IMAGE_WIDTH / columns;
+    this.children = [];
+    this.renderContent(node);
+    columnsItems.push(...this.children);
+
+    actualChildren.push({
+      properties: {
+        type: SectionType.CONTINUOUS,
+        column: {
+          space: columnGap * 20, // Convert to twips
+          count: node.attrs.columns,
+          equalWidth: true,
+        },
+      },
+      children: columnsItems,
+    });
+
+    this.children = actualChildren;
+    this.maxImageWidth = MAX_IMAGE_WIDTH;
+  }
+
   closeBlock(node: ProsemirrorNode<S>, props?: IParagraphOptions) {
     const paragraph = new Paragraph({
       children: this.current,
