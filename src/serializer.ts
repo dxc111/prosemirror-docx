@@ -758,7 +758,7 @@ export class DocxSerializerState<S extends Schema = any> {
         type: SectionType.CONTINUOUS,
         column: {
           space: columnGap * 20, // Convert to twips
-          count: node.attrs.columns,
+          count: columns,
           equalWidth: true,
         },
       },
