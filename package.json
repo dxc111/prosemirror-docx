@@ -37,7 +37,7 @@
     "lint:format:fix": "prettier --write \"src/**/*.ts\""
   },
   "dependencies": {
-    "docx": "^8.2.2",
+    "docx": "^9.5.0",
     "prosemirror-model": "^1.14.3"
   },
   "devDependencies": {
