@@ -3,7 +3,7 @@ import { DocxSerializer, MarkSerializer, NodeSerializer } from './serializer';
 import { coverColorToHex } from './utils';
 import sizeTransfer from './sizeTransfer';
 
-const LINE_TYPE: Record<string, UnderlineType> = {
+const LINE_TYPE: Record<string, (typeof UnderlineType)[keyof typeof UnderlineType]> = {
   solid: UnderlineType.SINGLE,
   double: UnderlineType.DOUBLE,
   dotted: UnderlineType.DOTTED,
@@ -42,7 +42,7 @@ const colors = [
     name: 'lightGray',
     value: 'rgba(135, 135, 135, 0.2)',
   },
-];
+] as const;
 export const defaultNodes: NodeSerializer = {
   text(state, node) {
     state.text(node.text ?? '');
@@ -122,8 +122,8 @@ export const defaultNodes: NodeSerializer = {
   bullet_list(state, node) {
     state.renderList(node, 'bullets');
   },
-  list_item(state, node) {
-    state.renderListItem(node);
+  list_item(state, node, parent, index) {
+    state.renderListItem(node, index);
   },
   // Presentational
   image(state, node) {

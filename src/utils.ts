@@ -17,6 +17,39 @@ import {
 import { Node as ProsemirrorNode } from 'prosemirror-model';
 import styles from './styles';
 
+type DocxImageType = 'jpg' | 'png' | 'gif' | 'bmp';
+
+export function getImageType(src: string, data?: unknown): DocxImageType {
+  let bytes: Uint8Array | undefined;
+  if (
+    data instanceof ArrayBuffer ||
+    Object.prototype.toString.call(data) === '[object ArrayBuffer]'
+  ) {
+    bytes = new Uint8Array(data as ArrayBuffer);
+  } else if (ArrayBuffer.isView(data)) {
+    bytes = new Uint8Array(data.buffer, data.byteOffset, data.byteLength);
+  }
+
+  if (bytes) {
+    if (bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) return 'jpg';
+    if (bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47) {
+      return 'png';
+    }
+    if (bytes[0] === 0x47 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x38) {
+      return 'gif';
+    }
+    if (bytes[0] === 0x42 && bytes[1] === 0x4d) return 'bmp';
+  }
+
+  const value = String(src || '').toLowerCase();
+  const dataType = value.match(/^data:image\/(png|jpe?g|gif|bmp)/)?.[1];
+  const extension = dataType || value.match(/\.([a-z0-9]+)(?:[?#]|$)/)?.[1];
+
+  if (extension === 'jpeg' || extension === 'jpg') return 'jpg';
+  if (extension === 'gif' || extension === 'bmp' || extension === 'png') return extension;
+  return 'png';
+}
+
 export function createShortId() {
   return Math.random().toString(36).substr(2, 9);
 }
@@ -160,6 +193,7 @@ function getHeaderAndFooter(pageOptions: any = {}, getImageBuffer: any) {
       const height = 30;
 
       image = new ImageRun({
+        type: getImageType(pageOptions.header.image, arrayBuffer),
         data: arrayBuffer,
         transformation: {
           width: height / aspect,

@@ -47,7 +47,7 @@ const styles = {
 
 export type NumberingStyles = keyof typeof styles;
 
-const NumberedListTypes: Record<string, LevelFormat> = {
+const NumberedListTypes: Record<string, (typeof LevelFormat)[keyof typeof LevelFormat]> = {
   decimal: LevelFormat.DECIMAL,
   'lower-alpha': LevelFormat.LOWER_LETTER,
   'lower-roman': LevelFormat.LOWER_ROMAN,
@@ -66,7 +66,7 @@ function makeLevels(type: NumberingStyles, extraStyles: any) {
       ? NumberedListTypes[extraStyles.listStyleType] || LevelFormat.DECIMAL
       : LevelFormat.DECIMAL;
 
-    return new Array(6).fill(listStyleType).map((format, level) => ({
+    return new Array(9).fill(listStyleType).map((format, level) => ({
       level,
       format,
       text: `${new Array(level + 1).fill(1).reduce((res, _, idx) => `${res}%${idx + 1}.`, '')}`,
@@ -86,7 +86,7 @@ function makeLevels(type: NumberingStyles, extraStyles: any) {
     }));
   }
 
-  return new Array(6).fill(LevelFormat.BULLET).map((format, level) => ({
+  return new Array(9).fill(LevelFormat.BULLET).map((format, level) => ({
     level,
     format,
     text: BulletListTypes[extraStyles?.listStyleType] || '●',

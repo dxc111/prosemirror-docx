@@ -32,7 +32,7 @@ import {
   WidthType,
 } from 'docx';
 import { createNumbering, INumbering, NumberingStyles } from './numbering';
-import { createDocFromState, createShortId } from './utils';
+import { createDocFromState, createShortId, getImageType } from './utils';
 
 type Mutable<T> = {
   -readonly [k in keyof T]: T[k];
@@ -47,6 +47,91 @@ function normalizeText(text: string) {
   );
 }
 
+type ListContext = {
+  childListItems: Map<number, number>;
+  currentItem: number;
+  depth: number;
+  left: number;
+  level: number;
+  reference: string;
+  nextItemIndex: number;
+  start: number;
+  style: NumberingStyles;
+};
+
+function normalizeListStart(value: unknown) {
+  const start = Number(value);
+  return Number.isFinite(start) ? globalThis.Math.max(globalThis.Math.floor(start), 1) : 1;
+}
+
+function numberToLowerAlpha(value: number) {
+  let number = normalizeListStart(value);
+  let result = '';
+
+  while (number > 0) {
+    number -= 1;
+    result = String.fromCharCode(97 + (number % 26)) + result;
+    number = globalThis.Math.floor(number / 26);
+  }
+
+  return result;
+}
+
+function numberToRoman(value: number, upper: boolean) {
+  let number = normalizeListStart(value);
+  const symbols: Array<[number, string]> = [
+    [1000, 'M'],
+    [900, 'CM'],
+    [500, 'D'],
+    [400, 'CD'],
+    [100, 'C'],
+    [90, 'XC'],
+    [50, 'L'],
+    [40, 'XL'],
+    [10, 'X'],
+    [9, 'IX'],
+    [5, 'V'],
+    [4, 'IV'],
+    [1, 'I'],
+  ];
+  let result = '';
+
+  symbols.forEach(([unit, symbol]) => {
+    while (number >= unit) {
+      result += symbol;
+      number -= unit;
+    }
+  });
+
+  return upper ? result : result.toLowerCase();
+}
+
+function formatOrderedNumber(value: number, listStyleType = 'decimal') {
+  switch (listStyleType) {
+    case 'lower-alpha':
+      return numberToLowerAlpha(value);
+    case 'lower-roman':
+      return numberToRoman(value, false);
+    case 'upper-roman':
+      return numberToRoman(value, true);
+    default:
+      return String(normalizeListStart(value));
+  }
+}
+
+function formatOrderedValues(values: number[], listStyleType = 'decimal') {
+  return values.length
+    ? `${values.map((value) => formatOrderedNumber(value, listStyleType)).join('.')}.`
+    : '';
+}
+
+function parseOrderPrefix(prefix: unknown) {
+  return String(prefix || '')
+    .split('.')
+    .filter(Boolean)
+    .map((value) => normalizeListStart(value));
+}
+
 const MAX_IMAGE_WIDTH = 600;
 // This is duplicated from @curvenote/schema
 export type AlignOptions = 'left' | 'center' | 'right';
@@ -55,15 +140,15 @@ export type NodeSerializer<S extends Schema = any> = Record<
   string,
   (
     state: DocxSerializerState<S>,
-    node: ProsemirrorNode<S>,
-    parent: ProsemirrorNode<S>,
+    node: ProsemirrorNode,
+    parent: ProsemirrorNode,
     index: number,
   ) => void
 >;
 
 export type MarkSerializer<S extends Schema = any> = Record<
   string,
-  (state: DocxSerializerState<S>, node: ProsemirrorNode<S>, mark: Mark<S>) => IRunOptions
+  (state: DocxSerializerState<S>, node: ProsemirrorNode, mark: Mark) => IRunOptions
 >;
 
 interface ImageBuffer {
@@ -112,6 +197,10 @@ export class DocxSerializerState<S extends Schema = any> {
 
   currentNumbering?: { reference: string; level: number };
 
+  private listStack: ListContext[] = [];
+
+  private numberingLevelStarts = new Map<string, Map<number, number>>();
+
   private footnoteIdx: number;
 
   private footnoteState = '';
@@ -156,13 +245,13 @@ export class DocxSerializerState<S extends Schema = any> {
     });
   }
 
-  render(node: ProsemirrorNode<S>, parent: ProsemirrorNode<S>, index: number) {
+  render(node: ProsemirrorNode, parent: ProsemirrorNode, index: number) {
     const target = this.nodes[node.type.name] || this.nodes.default;
     if (!target) throw new Error(`Token type \`${node.type.name}\` not supported by Word renderer`);
     target(this, node, parent, index);
   }
 
-  renderMarks(node: ProsemirrorNode<S>, marks: Mark[]): IRunOptions {
+  renderMarks(node: ProsemirrorNode, marks: readonly Mark[]): IRunOptions {
     return marks
       .map((mark) => {
         return this.marks[mark.type.name]?.(this, node, mark);
@@ -260,7 +349,7 @@ export class DocxSerializerState<S extends Schema = any> {
 
   closeTable() {}
 
-  hierarchy_title(node: ProsemirrorNode<S>) {
+  hierarchy_title(node: ProsemirrorNode) {
     if (this.pageBreak === 'page' && this.children.length > 0) {
       this.addParagraphOptions({ pageBreakBefore: true });
     }
@@ -278,7 +367,7 @@ export class DocxSerializerState<S extends Schema = any> {
     }
   }
 
-  horizontal_rule(node: ProsemirrorNode<S>) {
+  horizontal_rule(node: ProsemirrorNode) {
     if (this.pageBreak === 'hr') {
       this.addParagraphOptions({ pageBreakBefore: true });
     } else {
@@ -288,7 +377,7 @@ export class DocxSerializerState<S extends Schema = any> {
     }
   }
 
-  renderInline(parent: ProsemirrorNode<S>) {
+  renderInline(parent: ProsemirrorNode) {
     // Pop the stack over to this object when we encounter a link, and closeLink restores it
     // let currentLink: { link: string; stack: ParagraphChild[] } | undefined;
     // const closeLink = () => {
@@ -322,7 +411,7 @@ export class DocxSerializerState<S extends Schema = any> {
     //   };
     //   this.current = [];
     // };
-    const progress = (node: ProsemirrorNode<S>, offset: number, index: number) => {
+    const progress = (node: ProsemirrorNode, offset: number, index: number) => {
       // const links: ProsemirrorNode[] = [];
       // node.forEach((child) => {
       //   if (child.type.name === 'link') {
@@ -348,50 +437,184 @@ export class DocxSerializerState<S extends Schema = any> {
     // closeLink();
   }
 
-  renderList(node: ProsemirrorNode<S>, style: NumberingStyles) {
-    if (!this.currentNumbering) {
-      const nextId = createShortId();
-      this.numbering.push(createNumbering(nextId, style, this.numberingStyles?.[style] || null));
-      this.currentNumbering = { reference: nextId, level: 0 };
-    } else {
-      const { reference, level } = this.currentNumbering;
-      this.currentNumbering = { reference, level: level + 1 };
-    }
-    this.renderContent(node, {
-      style: `${style}list`,
+  private getNumberingIndex(reference: string) {
+    return this.numbering.findIndex((numbering) => numbering.reference === reference);
+  }
+
+  private getListStyleType(style: NumberingStyles) {
+    return (
+      this.numberingStyles?.[style]?.listStyleType || (style === 'numbered' ? 'decimal' : 'disc')
+    );
+  }
+
+  private getListPrefix(node: ProsemirrorNode, style: NumberingStyles) {
+    if (style !== 'numbered') return '';
+
+    const values = [
+      ...parseOrderPrefix(node.attrs.orderPrefix),
+      ...this.listStack
+        .filter((context) => context.style === 'numbered')
+        .map((context) => context.currentItem),
+    ];
+
+    return formatOrderedValues(values, this.getListStyleType(style));
+  }
+
+  private configureNumbering(
+    numbering: INumbering,
+    style: NumberingStyles,
+    leftOffset: number,
+    start: number,
+    prefix: string,
+  ) {
+    const levels = (numbering.levels || []).map((levelOptions: any, index: number) => {
+      const placeholders = new Array(index + 1)
+        .fill(null)
+        .map((_, placeholderIndex) => `%${placeholderIndex + 1}`)
+        .join('.');
+
+      return {
+        ...levelOptions,
+        ...(style === 'numbered' && index === 0 && start !== 1 ? { start } : {}),
+        ...(style === 'numbered' && prefix ? { text: `${prefix}${placeholders}.` } : {}),
+        style: {
+          ...levelOptions.style,
+          paragraph: {
+            ...levelOptions.style?.paragraph,
+            indent: {
+              ...levelOptions.style?.paragraph?.indent,
+              left: (levelOptions.style?.paragraph?.indent?.left || 0) + leftOffset,
+            },
+          },
+        },
+      };
     });
-    if (this.currentNumbering.level === 0) {
-      delete this.currentNumbering;
-    } else {
-      const { reference, level } = this.currentNumbering;
-      this.currentNumbering = { reference, level: level - 1 };
+
+    return { ...numbering, levels } as INumbering;
+  }
+
+  private getNumberingLevelLeft(reference: string, level: number) {
+    const numbering = this.numbering[this.getNumberingIndex(reference)];
+    return Number((numbering?.levels?.[level] as any)?.style?.paragraph?.indent?.left || 0);
+  }
+
+  private setNumberingLevelStart(reference: string, level: number, start: number) {
+    const numberingIndex = this.getNumberingIndex(reference);
+    if (numberingIndex < 0) return;
+
+    const numbering = this.numbering[numberingIndex];
+    const levels = (numbering.levels || []).map((levelOptions: any, index: number) =>
+      index === level && start !== 1 ? { ...levelOptions, start } : levelOptions,
+    );
+    this.numbering[numberingIndex] = { ...numbering, levels } as INumbering;
+  }
+
+  private canReuseNumbering(
+    parent: ListContext | undefined,
+    style: NumberingStyles,
+    start: number,
+  ) {
+    if (!parent || parent.style !== style || parent.level >= 8) return false;
+
+    const level = parent.level + 1;
+    if (parent.childListItems.get(level) === parent.currentItem) return false;
+
+    const starts = this.numberingLevelStarts.get(parent.reference);
+    const existingStart = starts?.get(level);
+    return existingStart === undefined || existingStart === start;
+  }
+
+  private createListContext(node: ProsemirrorNode, style: NumberingStyles) {
+    const parent = this.listStack[this.listStack.length - 1];
+    const depth = parent ? parent.depth + 1 : 0;
+    const start = style === 'numbered' ? normalizeListStart(node.attrs.order) : 1;
+    const hasExplicitPrefix =
+      style === 'numbered' && parseOrderPrefix(node.attrs.orderPrefix).length > 0;
+
+    if (!hasExplicitPrefix && this.canReuseNumbering(parent, style, start)) {
+      const level = parent.level + 1;
+      parent.childListItems.set(level, parent.currentItem);
+      this.numberingLevelStarts.get(parent.reference)?.set(level, start);
+      this.setNumberingLevelStart(parent.reference, level, start);
+      return {
+        childListItems: new Map(),
+        reference: parent.reference,
+        level,
+        depth,
+        left: this.getNumberingLevelLeft(parent.reference, level),
+        nextItemIndex: 0,
+        start,
+        currentItem: start,
+        style,
+      };
+    }
+
+    if (parent) parent.childListItems.set(parent.level + 1, parent.currentItem);
+    const reference = createShortId();
+    const numbering = createNumbering(reference, style, this.numberingStyles?.[style] || null);
+    const configuredNumbering = this.configureNumbering(
+      numbering,
+      style,
+      parent?.left || 0,
+      start,
+      this.getListPrefix(node, style),
+    );
+    this.numbering.push(configuredNumbering);
+    this.numberingLevelStarts.set(reference, new Map([[0, start]]));
+    return {
+      childListItems: new Map(),
+      reference,
+      level: 0,
+      depth,
+      left: this.getNumberingLevelLeft(reference, 0),
+      nextItemIndex: 0,
+      start,
+      currentItem: start,
+      style,
+    };
+  }
+
+  renderList(node: ProsemirrorNode, style: NumberingStyles) {
+    const context = this.createListContext(node, style);
+    this.listStack.push(context);
+    this.currentNumbering = { reference: context.reference, level: context.level };
+
+    try {
+      this.renderContent(node, { style: `${style}list` });
+    } finally {
+      this.listStack.pop();
+      const parent = this.listStack[this.listStack.length - 1];
+      if (parent) {
+        this.currentNumbering = { reference: parent.reference, level: parent.level };
+      } else {
+        delete this.currentNumbering;
+      }
     }
   }
 
-  // This is a pass through to the paragraphs, etc. underneath they will close the block
-  renderListItem(node: ProsemirrorNode<S>) {
-    if (!this.currentNumbering) throw new Error('Trying to create a list item without a list?');
-    this.addParagraphOptions({ numbering: this.currentNumbering });
-    // this.renderContent(node);
-    let onlyParagraph = true;
-    node.forEach((n, _, i) => {
-      if (n.type.name === 'paragraph' && onlyParagraph) {
-        if (this.current.length > 0) {
-          // add a break between paragraphs
-          this.current.push(new TextRun({ break: 1 }));
-        }
-        this.renderInline(n);
-      } else {
-        if (this.current.length > 0) {
-          this.closeBlock(n);
-        }
-        onlyParagraph = false;
-        this.render(n, node, i);
-      }
-    });
-    if (onlyParagraph) {
-      this.closeBlock(node);
+  renderListItem(node: ProsemirrorNode, index?: number) {
+    const context = this.listStack[this.listStack.length - 1];
+    if (!context || !this.currentNumbering) {
+      throw new Error('Trying to create a list item without a list?');
     }
+
+    const itemIndex = index ?? context.nextItemIndex;
+    context.nextItemIndex = itemIndex + 1;
+    context.currentItem = context.start + itemIndex;
+    this.addParagraphOptions({ numbering: this.currentNumbering });
+    let onlyParagraph = true;
+    node.forEach((child, _, childIndex) => {
+      if (child.type.name === 'paragraph' && onlyParagraph) {
+        if (this.current.length > 0) this.current.push(new TextRun({ break: 1 }));
+        this.renderInline(child);
+        return;
+      }
+
+      if (this.current.length > 0) this.closeBlock(child);
+      onlyParagraph = false;
+      this.render(child, node, childIndex);
+    });
+    if (onlyParagraph) this.closeBlock(node);
   }
 
   addParagraphOptions(opts: IParagraphOptions) {
@@ -448,7 +671,7 @@ export class DocxSerializerState<S extends Schema = any> {
     });
   }
 
-  bib_cite(node: ProsemirrorNode<S>) {
+  bib_cite(node: ProsemirrorNode) {
     try {
       if (node.type.name === 'group_bio_citation') {
         this.current.push(new TextRun(node.attrs.cache));
@@ -466,7 +689,7 @@ export class DocxSerializerState<S extends Schema = any> {
     }
   }
 
-  bibliography(node: ProsemirrorNode<S>) {
+  bibliography(node: ProsemirrorNode) {
     try {
       if (node.type.name === 'bibliography') {
         if (this.cslFormatService) {
@@ -522,6 +745,7 @@ export class DocxSerializerState<S extends Schema = any> {
 
     this.current.push(
       new ImageRun({
+        type: getImageType(src, arrayBuffer),
         data: arrayBuffer,
         transformation: {
           width,
@@ -540,7 +764,7 @@ export class DocxSerializerState<S extends Schema = any> {
         // },
       }),
     );
-    let alignment: AlignmentType;
+    let alignment: (typeof AlignmentType)[keyof typeof AlignmentType];
     switch (align) {
       case 'right':
         alignment = AlignmentType.RIGHT;
@@ -565,6 +789,7 @@ export class DocxSerializerState<S extends Schema = any> {
       const newWidth = maxHeight / aspect;
       this.current.push(
         new ImageRun({
+          type: getImageType(src, arrayBuffer),
           data: arrayBuffer,
           transformation: {
             width: newWidth,
@@ -577,6 +802,7 @@ export class DocxSerializerState<S extends Schema = any> {
 
     this.current.push(
       new ImageRun({
+        type: getImageType(src, arrayBuffer),
         data: arrayBuffer,
         transformation: {
           width,
@@ -627,7 +853,7 @@ export class DocxSerializerState<S extends Schema = any> {
     );
   }
 
-  table(node: ProsemirrorNode<S>) {
+  table(node: ProsemirrorNode) {
     const actualChildren = this.children;
     const rows: TableRow[] = [];
     let percent = 0;
@@ -647,7 +873,7 @@ export class DocxSerializerState<S extends Schema = any> {
       this.maxImageWidth = MAX_IMAGE_WIDTH / rowContent.childCount;
       percent = percent || 100 / (rowContent.childCount || 1);
       colCount = rowContent.childCount;
-      rowContent.forEach((cell: ProsemirrorNode<S>) => {
+      rowContent.forEach((cell: ProsemirrorNode) => {
         this.children = [];
         this.renderContent(cell, { style: 'TableCell' });
         const tableCellOpts: Mutable<ITableCellOptions> = {
@@ -684,13 +910,13 @@ export class DocxSerializerState<S extends Schema = any> {
     this.children = actualChildren;
   }
 
-  columns(node: ProsemirrorNode<S>) {
+  columns(node: ProsemirrorNode) {
     if (node.childCount < 1) return;
     const actualChildren = this.children;
     const columnsItems: Paragraph[] = [];
     const columnsWidth: Column[] = [];
 
-    node.content.forEach((column: ProsemirrorNode<S>, _, idx) => {
+    node.content.forEach((column: ProsemirrorNode, _, idx) => {
       this.children = [];
 
       if (idx > 0 && idx < node.childCount - 1) {
@@ -740,7 +966,7 @@ export class DocxSerializerState<S extends Schema = any> {
     this.maxImageWidth = MAX_IMAGE_WIDTH;
   }
 
-  equalColumns(node: ProsemirrorNode<S>, colCount = 0, colGap = 0) {
+  equalColumns(node: ProsemirrorNode, colCount = 0, colGap = 0) {
     if (node.childCount < 1) return;
     const actualChildren = this.children;
     const columnsItems: Paragraph[] = [];
@@ -769,7 +995,7 @@ export class DocxSerializerState<S extends Schema = any> {
     this.maxImageWidth = MAX_IMAGE_WIDTH;
   }
 
-  closeBlock(node: ProsemirrorNode<S>, props?: IParagraphOptions) {
+  closeBlock(node: ProsemirrorNode, props?: IParagraphOptions) {
     const paragraph = new Paragraph({
       children: this.current,
       style: 'NormalPara',
@@ -793,7 +1019,7 @@ export class DocxSerializer<S extends Schema = any> {
   }
 
   serialize(
-    content: ProsemirrorNode<S>,
+    content: ProsemirrorNode,
     options: Options,
     footerText = '',
     footnotes: string[] = [],

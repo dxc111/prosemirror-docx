@@ -1,8 +1,43 @@
 import { Schema } from 'prosemirror-model';
 import { builders } from 'prosemirror-test-builder';
-import { schemas } from '@curvenote/schema';
 
-const schema = new Schema(schemas.presets.full);
+const schema = new Schema({
+  nodes: {
+    doc: { content: 'block+' },
+    paragraph: { content: 'inline*', group: 'block' },
+    text: { group: 'inline' },
+    heading: { attrs: { level: { default: 1 } }, content: 'inline*', group: 'block' },
+    horizontal_rule: { group: 'block' },
+    list_item: { content: 'paragraph block*' },
+    ordered_list: {
+      attrs: { order: { default: 1 } },
+      content: 'list_item+',
+      group: 'block',
+    },
+    bullet_list: { content: 'list_item+', group: 'block' },
+    code_block: { content: 'text*', group: 'block' },
+    hard_break: { inline: true, group: 'inline' },
+    image: {
+      attrs: { src: {}, alt: { default: null } },
+      inline: true,
+      group: 'inline',
+    },
+    math: { content: 'text*', inline: true, group: 'inline' },
+    equation: {
+      attrs: { numbered: { default: true }, id: { default: null } },
+      content: 'text*',
+      group: 'block',
+    },
+    aside: { content: 'block+', group: 'block' },
+  },
+  marks: {
+    em: {},
+    strong: {},
+    code: {},
+    link: { attrs: { href: {} } },
+    abbr: { attrs: { title: {} } },
+  },
+});
 
 export const tnodes = builders(schema, {
   p: { nodeType: 'paragraph' },
@@ -24,4 +59,4 @@ export const tnodes = builders(schema, {
   aside: { nodeType: 'aside' },
 });
 
-export const tdoc = (...args: Parameters<typeof tnodes.doc>) => tnodes.doc('', ...args);
+export const tdoc = (...args: any[]) => (tnodes.doc as any)('', ...args);
