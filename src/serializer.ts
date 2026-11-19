@@ -919,26 +919,6 @@ export class DocxSerializerState<S extends Schema = any> {
     node.content.forEach((column: ProsemirrorNode, _, idx) => {
       this.children = [];
 
-      if (idx > 0 && idx < node.childCount - 1) {
-        // const lastParagraph = columnsItems[columnsItems.length - 1];
-        // if (lastParagraph && lastParagraph instanceof Paragraph) {
-        //   lastParagraph.addChildElement(new ColumnBreak());
-        // } else {
-        //   columnsItems.push(new Paragraph({ children: [new ColumnBreak()] }));
-        // }
-        columnsItems.push(
-          new Paragraph({
-            children: [new ColumnBreak()],
-            spacing: {
-              line: 0,
-              lineRule: LineRuleType.EXACT,
-              before: 0,
-              after: 0,
-            },
-          }),
-        );
-      }
-
       columnsWidth.push(new Column({ width: (parseFloat(column.attrs.basis) / 100) * 9010 }));
       this.maxImageWidth = (MAX_IMAGE_WIDTH * parseFloat(column.attrs.basis)) / 100;
       this.renderContent(column);
@@ -947,6 +927,21 @@ export class DocxSerializerState<S extends Schema = any> {
       // });
 
       columnsItems.push(...this.children);
+
+      // Add column break except for last column
+      if (idx < node.childCount - 1) {
+        columnsItems.push(
+          new Paragraph({
+            children: [new ColumnBreak()],
+            spacing: {
+              after: 0,
+              before: 0,
+              lineRule: LineRuleType.EXACT,
+              line: 1,
+            },
+          }),
+        );
+      }
     });
 
     actualChildren.push({
