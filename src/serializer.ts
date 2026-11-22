@@ -31,13 +31,7 @@ import {
   TextWrappingType,
   WidthType,
 } from 'docx';
-import {
-  createNumbering,
-  defaultBulletLevels,
-  getMixedLevels,
-  INumbering,
-  NumberingStyles,
-} from './numbering';
+import { createNumbering, getMixedLevels, INumbering, NumberingStyles } from './numbering';
 import { createDocFromState, createShortId, getImageType } from './utils';
 
 type Mutable<T> = {
@@ -60,26 +54,11 @@ type ListContext = {
   left: number;
   legacy: boolean;
   level: number;
-  // 1-based level chosen in the editor (or inherited from the parent list), 0 when unset
-  listLevel: number;
-  // Empty for leveled lists: they follow leveledNumbering, whose definition can change mid-list
   reference: string;
   nextItemIndex: number;
   start: number;
   style: NumberingStyles;
 };
-
-// Same as maxListLevel in the editor's listLevel.ts
-const MAX_LIST_LEVEL = 9;
-
-function resolveListLevel(node: ProsemirrorNode, parent: ListContext | undefined, style: string) {
-  const level = Number(node.attrs.listLevel);
-  if (Number.isInteger(level) && level >= 1 && level <= MAX_LIST_LEVEL) return level;
-  // An unset list nested directly in a leveled list of the same kind takes the next level
-  return parent?.listLevel && parent.style === style
-    ? globalThis.Math.min(parent.listLevel + 1, MAX_LIST_LEVEL)
-    : 0;
-}
 
 function normalizeListStart(value: unknown) {
   const start = Number(value);
@@ -222,16 +201,6 @@ export class DocxSerializerState<S extends Schema = any> {
   private listStack: ListContext[] = [];
 
   private numberingLevelStarts = new Map<string, Map<number, number>>();
-
-  // Leveled lists of one kind share a definition so Word keeps counting across the document
-  // counters: the editor's count per level; starts and shown: the w:start values of the current
-  // definition and what Word shows so far in it
-  private leveledNumbering: Partial<
-    Record<
-      NumberingStyles,
-      { reference: string; counters: number[]; starts: number[]; shown: number[] }
-    >
-  > = {};
 
   private footnoteIdx: number;
 
@@ -484,7 +453,7 @@ export class DocxSerializerState<S extends Schema = any> {
 
     const values = [
       ...parseOrderPrefix(node.attrs.orderPrefix),
-      ...this.listStackSinceLeveled()
+      ...this.listStack
         .filter((context) => context.style === 'numbered')
         .map((context) => context.currentItem),
     ];
@@ -541,24 +510,12 @@ export class DocxSerializerState<S extends Schema = any> {
     this.numbering[numberingIndex] = { ...numbering, levels } as INumbering;
   }
 
-  // A leveled list cuts the "1.1." chain: lists below it number from themselves
-  private listStackSinceLeveled() {
-    let index = this.listStack.length - 1;
-    while (index >= 0 && !this.listStack[index].listLevel) index -= 1;
-    return this.listStack.slice(index + 1);
-  }
-
-  private referenceOf(context: ListContext) {
-    return context.listLevel ? this.leveledNumbering[context.style]!.reference : context.reference;
-  }
-
   private canReuseNumbering(
     parent: ListContext | undefined,
     style: NumberingStyles,
     start: number,
   ) {
     if (!parent || parent.style !== style || parent.level >= 8) return false;
-    if (parent.listLevel) return false;
 
     const level = parent.level + 1;
     if (parent.childListItems.get(level) === parent.currentItem) return false;
@@ -574,13 +531,11 @@ export class DocxSerializerState<S extends Schema = any> {
     const start = style === 'numbered' ? normalizeListStart(node.attrs.order) : 1;
     const hasExplicitPrefix =
       style === 'numbered' && parseOrderPrefix(node.attrs.orderPrefix).length > 0;
-    const listLevel = hasExplicitPrefix ? 0 : resolveListLevel(node, parent, style);
-    if (listLevel) return this.createLeveledListContext(node, style, listLevel, parent, depth);
     // Manually prefixed ordered lists (e.g. "1.1. ") and the ordered lists inside them
     // keep the "1.1.1." numbering even when the template defines per-level styles.
     const legacy =
       style === 'numbered' &&
-      (hasExplicitPrefix || this.listStackSinceLeveled().some((context) => context.legacy));
+      (hasExplicitPrefix || this.listStack.some((context) => context.legacy));
 
     if (!hasExplicitPrefix && this.canReuseNumbering(parent, style, start)) {
       const level = parent.level + 1;
@@ -593,7 +548,6 @@ export class DocxSerializerState<S extends Schema = any> {
         level,
         depth,
         left: this.getNumberingLevelLeft(parent.reference, level),
-        listLevel: 0,
         nextItemIndex: 0,
         start,
         currentItem: start,
@@ -628,7 +582,6 @@ export class DocxSerializerState<S extends Schema = any> {
       level: 0,
       depth,
       left: this.getNumberingLevelLeft(reference, 0),
-      listLevel: 0,
       nextItemIndex: 0,
       start,
       currentItem: start,
@@ -637,98 +590,10 @@ export class DocxSerializerState<S extends Schema = any> {
     };
   }
 
-  private createLeveledListContext(
-    node: ProsemirrorNode,
-    style: NumberingStyles,
-    listLevel: number,
-    parent: ListContext | undefined,
-    depth: number,
-  ): ListContext {
-    const level = listLevel - 1;
-    if (!this.leveledNumbering[style]) {
-      this.leveledNumbering[style] = {
-        reference: '',
-        counters: new Array(MAX_LIST_LEVEL).fill(0),
-        starts: [],
-        shown: [],
-      };
-    }
-    const shared = this.leveledNumbering[style]!;
-    const order = normalizeListStart(node.attrs.order);
-    // A start the user typed (e.g. "3. ") sets the value of this level, like Word's "Set numbering value"
-    if (style === 'numbered' && order > 1) shared.counters[level] = order - 1;
-    if (!shared.reference) this.startLeveledNumbering(style, level);
-
-    if (parent) parent.childListItems.set(parent.level + 1, parent.currentItem);
-    return {
-      childListItems: new Map(),
-      reference: '',
-      level,
-      depth,
-      // The level decides the indent, as in Word: it comes from the level definition
-      left: this.getNumberingLevelLeft(shared.reference, level),
-      listLevel,
-      nextItemIndex: 0,
-      start: 1,
-      currentItem: 1,
-      style,
-      legacy: false,
-    };
-  }
-
-  // Starts a definition whose next item at this level shows the current count. A level's w:start
-  // is also where Word restarts it after a higher level, so the deeper levels start at 1.
-  // Without a per-level preset the item also shows the upper levels ("1.1."), and Word shows
-  // an upper level that has no item yet in this definition at its w:start, so those start at
-  // their current value; levels with no item at all show 1, as in the editor.
-  private startLeveledNumbering(style: NumberingStyles, level: number) {
-    const shared = this.leveledNumbering[style]!;
-    const outline = style === 'numbered' && !getMixedLevels(this.numberingStyles?.[style]);
-    shared.reference = createShortId();
-    shared.starts = shared.counters.map((count, index) => {
-      if (index < level && outline) return globalThis.Math.max(count, 1);
-      return index <= level ? count + 1 : 1;
-    });
-    shared.shown = [];
-    this.numbering.push(this.createLeveledNumbering(shared.reference, style, shared.starts));
-  }
-
-  // Follows the editor's numbering and switches to a new definition whenever Word would show
-  // another number for the item
-  private countLeveledItem(context: ListContext) {
-    const shared = this.leveledNumbering[context.style]!;
-    const { level } = context;
-    const value = shared.counters[level] + 1;
-    const shown =
-      shared.shown[level] === undefined ? shared.starts[level] : shared.shown[level] + 1;
-    if (shown !== value) this.startLeveledNumbering(context.style, level);
-    shared.counters[level] = value;
-    shared.counters.fill(0, level + 1);
-    shared.shown[level] = value;
-    shared.shown.length = level + 1;
-    this.currentNumbering = { reference: shared.reference, level };
-  }
-
-  private createLeveledNumbering(reference: string, style: NumberingStyles, starts: number[]) {
-    const options = this.numberingStyles?.[style] || {};
-    const numbering = createNumbering(reference, style, {
-      ...options,
-      levels:
-        getMixedLevels(options) ||
-        (style === 'bullets' && !options.listStyleType ? defaultBulletLevels : undefined),
-    });
-    const levels = (numbering.levels || []).map((levelOptions: any, index: number) =>
-      style === 'numbered' && starts[index] > 1
-        ? { ...levelOptions, start: starts[index] }
-        : levelOptions,
-    );
-    return { ...numbering, levels } as INumbering;
-  }
-
   renderList(node: ProsemirrorNode, style: NumberingStyles) {
     const context = this.createListContext(node, style);
     this.listStack.push(context);
-    this.currentNumbering = { reference: this.referenceOf(context), level: context.level };
+    this.currentNumbering = { reference: context.reference, level: context.level };
 
     try {
       this.renderContent(node, { style: `${style}list` });
@@ -736,7 +601,7 @@ export class DocxSerializerState<S extends Schema = any> {
       this.listStack.pop();
       const parent = this.listStack[this.listStack.length - 1];
       if (parent) {
-        this.currentNumbering = { reference: this.referenceOf(parent), level: parent.level };
+        this.currentNumbering = { reference: parent.reference, level: parent.level };
       } else {
         delete this.currentNumbering;
       }
@@ -752,7 +617,6 @@ export class DocxSerializerState<S extends Schema = any> {
     const itemIndex = index ?? context.nextItemIndex;
     context.nextItemIndex = itemIndex + 1;
     context.currentItem = context.start + itemIndex;
-    if (context.listLevel && context.style === 'numbered') this.countLeveledItem(context);
     this.addParagraphOptions({ numbering: this.currentNumbering });
     let onlyParagraph = true;
     node.forEach((child, _, childIndex) => {

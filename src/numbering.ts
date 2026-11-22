@@ -130,15 +130,6 @@ function makeLevels(type: NumberingStyles, extraStyles: any, levelOffset = 0) {
   }));
 }
 
-// Symbols of leveled bullet lists when the template sets neither a per-level preset nor a bullet
-// style. Keep in sync with the level defaults in the editor's style.scss. Without a preset,
-// leveled ordered lists use the same "1.1." definition as nested lists.
-export const defaultBulletLevels: ListLevel[] = [
-  { type: 'disc' },
-  { type: 'circle' },
-  { type: 'square' },
-];
-
 export function createNumbering(
   reference: string,
   style: NumberingStyles,
